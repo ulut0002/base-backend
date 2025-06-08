@@ -3,15 +3,11 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import {
   changeUserPassword,
-  createLocalUser,
-  findExistingUserByUsernameOrEmail,
   findUserById,
-  findUserByUsername,
   loginUser,
   registerUser,
 } from "../services";
 
-import bcrypt from "bcryptjs";
 import { StrategyOptions, Strategy as JwtStrategy } from "passport-jwt";
 import { PassportStatic } from "passport";
 import {

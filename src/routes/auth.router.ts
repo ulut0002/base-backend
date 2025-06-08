@@ -2,7 +2,15 @@
 
 import express, { Router } from "express";
 import passport from "passport";
-import { login, logout, me, register } from "../controllers";
+import {
+  login,
+  logout,
+  me,
+  register,
+  changePassword,
+  checkAuthStatus,
+  refreshToken,
+} from "../controllers";
 
 const authRouter: Router = express.Router();
 
@@ -33,5 +41,34 @@ authRouter.get("/me", passport.authenticate("jwt", { session: false }), me);
  * @access  Optional protection — works even if the user is already logged out.
  */
 authRouter.post("/logout", logout);
+
+/**
+ * @route   POST /auth/change-password
+ * @desc    Allows a logged-in user to change their password.
+ * @access  Protected
+ */
+authRouter.post(
+  "/change-password",
+  passport.authenticate("jwt", { session: false }),
+  changePassword
+);
+
+/**
+ * @route   POST /auth/refresh-token
+ * @desc    Issues a new access token using the refresh token.
+ * @access  Public
+ */
+authRouter.post("/refresh-token", refreshToken);
+
+/**
+ * @route   GET /auth/status
+ * @desc    Returns authentication status of the current session.
+ * @access  Protected
+ */
+authRouter.get(
+  "/status",
+  passport.authenticate("jwt", { session: false }),
+  checkAuthStatus
+);
 
 export { authRouter };
