@@ -11,24 +11,25 @@ import passport from "passport";
 import { healthRouter } from "./routes/health.route";
 import { getBackendUrl, loadConfig } from "./lib/config";
 import { ensureBody } from "./middleware";
+import { authRouter, rootRouter } from "./routes";
 
 dotenv.config();
 const config = loadConfig();
 const backendUrl = getBackendUrl();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = config.BACKEND_PORT || process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || "";
 
 app.use(express.json());
 
 // Enable CORS for cross-origin requests (e.g., from Next.js frontend)
-app.use(
-  cors({
-    origin: backendUrl, // expected frontend origin
-    credentials: true, // allows cookies to be sent with requests
-  })
-);
+// app.use(
+//   cors({
+//     origin: backendUrl, // expected frontend origin
+//     credentials: true, // allows cookies to be sent with requests
+//   })
+// );
 
 // Use compression to gzip HTTP responses for better performance
 app.use(compression());
@@ -64,3 +65,7 @@ if (config.BACKEND_MONGODB_URI) {
 app.listen(PORT, () => {
   console.log(`Server running at ${backendUrl}`);
 });
+
+// Define API routes
+app.use("/", rootRouter); // e.g., GET / → API info
+app.use("/auth", authRouter); // e.g., POST /auth/login, /auth/register
