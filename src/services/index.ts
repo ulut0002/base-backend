@@ -1,3 +1,4 @@
+import { registerUser, loginUser, changeUserPassword } from "./auth.services";
 import {
   findUserById,
   findUserByUsername,
@@ -11,3 +12,5 @@ export {
   findExistingUserByUsernameOrEmail,
   createLocalUser,
 };
+
+export { registerUser, loginUser, changeUserPassword };
