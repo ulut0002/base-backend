@@ -5,13 +5,12 @@ import cors from "cors";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
-import * as http from "http";
-import passport from "passport";
 
-import { healthRouter } from "./routes/health.route";
-import { getBackendUrl, loadConfig } from "./lib/config";
 import { ensureBody } from "./middleware";
 import { authRouter, rootRouter } from "./routes";
+import { configureJwtStrategy } from "./controllers";
+import passport from "passport";
+import { getBackendUrl, loadConfig } from "./lib";
 
 dotenv.config();
 const config = loadConfig();
@@ -19,17 +18,19 @@ const backendUrl = getBackendUrl();
 
 const app = express();
 const PORT = config.BACKEND_PORT || process.env.PORT || 3000;
-const MONGO_URI = process.env.MONGO_URI || "";
+
+// Configure JWT strategy for passport (reads JWT from cookies)
+configureJwtStrategy(passport);
 
 app.use(express.json());
 
 // Enable CORS for cross-origin requests (e.g., from Next.js frontend)
-// app.use(
-//   cors({
-//     origin: backendUrl, // expected frontend origin
-//     credentials: true, // allows cookies to be sent with requests
-//   })
-// );
+app.use(
+  cors({
+    origin: backendUrl, // expected frontend origin
+    credentials: true, // allows cookies to be sent with requests
+  })
+);
 
 // Use compression to gzip HTTP responses for better performance
 app.use(compression());
