@@ -52,9 +52,44 @@ const createLocalUser = async (newUser: UserRegistrationDTO) => {
   return await user.save();
 };
 
+const getUsers = async (options: {
+  page: number;
+  limit: number;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}) => {
+  // TODO: implement DB query with pagination, search, and sorting
+  return {
+    total: 0,
+    page: options.page,
+    limit: options.limit,
+    users: [],
+  };
+};
+
+const getPublicUserProfile = async (username: string) => {
+  // TODO: fetch public read-only profile
+  return null;
+};
+
+const updateUser = async (id: string, data: any) => {
+  // TODO: update user data
+  return null;
+};
+
+const deleteUser = async (id: string) => {
+  // TODO: delete user
+  return true;
+};
+
 export {
   findUserByUsername,
   findUserById,
   findExistingUserByUsernameOrEmail,
   createLocalUser,
+  getUsers,
+  getPublicUserProfile,
+  updateUser,
+  deleteUser,
 };

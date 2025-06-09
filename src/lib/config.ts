@@ -1,13 +1,32 @@
+let _cachedConfig: EnvConfig | null = null;
+
 /**
  * Returns a shallow copy of the loaded environment configuration.
  */
 function loadConfig(): EnvConfig {
-  return {
+  // if (_cachedConfig) return _cachedConfig;
+
+  _cachedConfig = {
     BACKEND_URL: process.env.BACKEND_URL || "",
     BACKEND_PORT: process.env.BACKEND_PORT || "",
     BACKEND_MONGODB_URI: process.env.BACKEND_MONGODB_URI || "",
     BACKEND_JWT_SECRET_KEY: process.env.BACKEND_JWT_SECRET_KEY || "",
+    PASSWORD_RESET_WINDOW_MINUTES: parseInt(
+      String(process.env.PASSWORD_RESET_WINDOW_MINUTES)
+    ),
+    PASSWORD_RESET_RATE_LIMIT: parseInt(
+      String(process.env.PASSWORD_RESET_RATE_LIMIT)
+    ),
+    PASSWORD_RESET_EXPIRATION_MINUTES: parseInt(
+      String(process.env.PASSWORD_RESET_EXPIRATION_MINUTES)
+    ),
+    NODEMAILER_HOST: process.env.NODEMAILER_HOST,
+    NODEMAILER_PORT: parseInt(String(process.env.NODEMAILER_PORT)),
+    NODEMAILER_USER: process.env.NODEMAILER_USER, // SMTP user for authentication
+    NODEMAILER_PASS: process.env.NODEMAILER_PASS, //
+    NODEMAILER_EMAIL_FROM: process.env.NODEMAILER_EMAIL_FROM,
   };
+  return _cachedConfig;
 }
 
 /**

@@ -12,4 +12,18 @@ interface LoginUserInput {
   password: string;
   jwtSecretKey: string;
 }
-export type { RegisterUserInput, LoginUserInput };
+
+type VerificationCodeType =
+  | "PASSWORD_RESET"
+  | "EMAIL_VERIFICATION"
+  | "TWO_FACTOR"
+  | "INVITE";
+
+type VerificationCodeStatus = "PENDING" | "VERIFIED" | "EXPIRED";
+
+export type {
+  RegisterUserInput,
+  LoginUserInput,
+  VerificationCodeType,
+  VerificationCodeStatus,
+};

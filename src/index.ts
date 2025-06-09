@@ -7,47 +7,58 @@ import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 
 import { ensureBody } from "./middleware";
-import { authRouter, rootRouter } from "./routes";
+import {
+  adminRouter,
+  authRouter,
+  meRouter,
+  recoveryRouter,
+  rootRouter,
+  securityRouter,
+} from "./routes";
 import { configureJwtStrategy } from "./controllers";
 import passport from "passport";
 import { getBackendUrl, loadConfig } from "./lib";
 
+// Load environment variables from .env file
 dotenv.config();
+
+// Load custom config and determine backend URL
 const config = loadConfig();
 const backendUrl = getBackendUrl();
 
 const app = express();
 const PORT = config.BACKEND_PORT || process.env.PORT || 3000;
 
-// Configure JWT strategy for passport (reads JWT from cookies)
+// Setup JWT authentication strategy for Passport
 configureJwtStrategy(passport);
 
+// Middleware for parsing JSON request bodies
 app.use(express.json());
 
-// Enable CORS for cross-origin requests (e.g., from Next.js frontend)
+// Enable CORS with credentials for frontend communication
 app.use(
   cors({
-    origin: backendUrl, // expected frontend origin
-    credentials: true, // allows cookies to be sent with requests
+    origin: backendUrl,
+    credentials: true,
   })
 );
 
-// Use compression to gzip HTTP responses for better performance
+// Compress HTTP responses to improve performance
 app.use(compression());
 
-// Parse cookies from incoming requests
+// Parse cookies attached to incoming requests
 app.use(cookieParser());
 
-// Parse JSON bodies (redundant with express.json, but kept for safety)
+// Additional body parsing middleware (for safety)
 app.use(bodyParser.json());
 
-// Initialize Passport middleware (needed before protected routes)
+// Initialize Passport (JWT auth middleware)
 app.use(passport.initialize());
 
-// Ensure `req.body` is always defined (avoids null reference errors)
+// Ensure req.body is never undefined
 app.use(ensureBody);
 
-// Setup MongoDB connection
+// Connect to MongoDB
 if (config.BACKEND_MONGODB_URI) {
   mongoose.Promise = Promise;
   mongoose.connect(config.BACKEND_MONGODB_URI);
@@ -63,10 +74,18 @@ if (config.BACKEND_MONGODB_URI) {
   console.error("MongoDB URI is not defined in environment variables.");
 }
 
+// Start the Express server
 app.listen(PORT, () => {
   console.log(`Server running at ${backendUrl}`);
 });
 
-// Define API routes
-app.use("/", rootRouter); // e.g., GET / → API info
-app.use("/auth", authRouter); // e.g., POST /auth/login, /auth/register
+// -------------------------
+// Register API route groups
+// -------------------------
+
+app.use("/", rootRouter); // Public API info and health checks
+app.use("/auth", authRouter); // Authentication (login, register, etc.)
+app.use("/profile", meRouter); // Authenticated user's account/profile
+app.use("/security", securityRouter); // Security features (2FA, sessions, etc.)
+app.use("/admin", adminRouter); // Admin-only user management routes
+app.use("/recovery", recoveryRouter); // Password and email recovery routes
