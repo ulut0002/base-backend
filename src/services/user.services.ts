@@ -20,25 +20,21 @@ const findUserById = async (userId: string) => {
 };
 
 /**
- * Checks for an existing user using either a username or email.
- * Useful during registration to avoid duplicate accounts.
- * @param username - Optional username to check.
- * @param email - Optional email to check.
- * @returns The user if found, otherwise null.
+ * Finds a user by matching the given value against username or email.
+ * Useful for login or password reset where either field is accepted.
+ * @param params.usernameOrEmail - A string representing either the username or email.
+ * @returns The matched user document, or null if not found.
  */
-const findExistingUserByUsernameOrEmail = async (
-  username?: string,
-  email?: string
-) => {
-  const orConditions = [];
-  if (username) orConditions.push({ username });
-  if (email) orConditions.push({ email });
+const findExistingUserByUsernameOrEmail = async ({
+  usernameOrEmail,
+}: {
+  usernameOrEmail: string;
+}) => {
+  if (!usernameOrEmail) return null;
 
-  if (orConditions.length === 0) {
-    return null;
-  }
-
-  return await UserModel.findOne({ $or: orConditions });
+  return await UserModel.findOne({
+    $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
+  });
 };
 
 /**

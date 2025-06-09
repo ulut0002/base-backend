@@ -1,7 +1,7 @@
 // --- services/recovery.service.ts ---
 
 import { loadConfig } from "../lib";
-import { generateVerificationCode } from "../lib/utils";
+import { generateVerificationCode, sendPasswordResetEmail } from "../lib/utils";
 import { VerificationCodeModel } from "../modals/VerificationCode";
 import { findExistingUserByUsernameOrEmail } from "./user.services";
 
@@ -25,9 +25,12 @@ const resendVerificationEmail = async (email: string) => {
   // Placeholder logic for resending verification link
 };
 
-const requestPasswordReset = async (emailOrUsername: string) => {
+const requestPasswordReset = async (usernameOrEmail: string) => {
   const config = loadConfig();
-  const user = await findExistingUserByUsernameOrEmail(emailOrUsername);
+  const user = await findExistingUserByUsernameOrEmail({
+    usernameOrEmail,
+  });
+
   if (!user || !user.email) {
     throw new Error("User not found or email not available");
   }
@@ -66,6 +69,8 @@ const requestPasswordReset = async (emailOrUsername: string) => {
   });
 
   //   await sendPasswordResetEmail(user.email, code);
+
+  await sendPasswordResetEmail(user.email, code);
 };
 
 export {
