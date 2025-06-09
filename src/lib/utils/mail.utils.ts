@@ -25,16 +25,26 @@ const createTransporter = (): Transporter => {
   return transporter;
 };
 
-async function sendPasswordResetEmail(to: string, code: string) {
+const getFromEmail = (): string => {
+  const config = loadConfig();
+  let fromEmail = config.NODEMAILER_USER;
+  if (config.NODEMAILER_EMAIL_FROM) {
+    fromEmail = `${config.NODEMAILER_EMAIL_FROM} <${fromEmail}>`;
+  }
+  return fromEmail || "";
+};
+
+const sendPasswordResetEmail = async (to: string, code: string) => {
   const transporter = createTransporter();
+  let fromEmail = getFromEmail();
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM || "no-reply@example.com",
+    from: fromEmail || "no-reply@example.com",
     to,
     subject: "Your Password Reset Code",
     text: `Your password reset code is: ${code}`,
     html: `<p>Your password reset code is: <strong>${code}</strong></p>`,
   });
-}
+};
 
 export { sendPasswordResetEmail };

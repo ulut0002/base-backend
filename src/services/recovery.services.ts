@@ -56,7 +56,7 @@ const requestPasswordReset = async (usernameOrEmail: string) => {
 
   const code = generateVerificationCode();
 
-  await VerificationCodeModel.create({
+  const verificationCode = await VerificationCodeModel.create({
     userId: user._id,
     code,
     type: "PASSWORD_RESET",
@@ -68,9 +68,11 @@ const requestPasswordReset = async (usernameOrEmail: string) => {
     },
   });
 
-  //   await sendPasswordResetEmail(user.email, code);
-
-  await sendPasswordResetEmail(user.email, code);
+  if (verificationCode) {
+    await sendPasswordResetEmail(user.email, code);
+  } else {
+    throw new Error("Failed to create password reset code");
+  }
 };
 
 export {
