@@ -1,5 +1,5 @@
 import { UserRegistrationDTO, NewUserInput, UserDocument } from "./user.types";
-
+import { NormalizeOptions } from "./email.types";
 import {
   RegisterUserInput,
   LoginUserInput,
@@ -13,3 +13,5 @@ export type {
   VerificationCodeType,
   VerificationCodeStatus,
 };
+
+export type { NormalizeOptions };

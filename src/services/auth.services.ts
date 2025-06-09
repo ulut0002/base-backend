@@ -1,3 +1,4 @@
+import { normalizeEmail } from "../lib/utils";
 import { LoginUserInput, RegisterUserInput } from "../types";
 import {
   createLocalUser,
@@ -14,13 +15,24 @@ const registerUser = async ({
   password,
   jwtSecretKey,
 }: RegisterUserInput): Promise<{ token: string }> => {
-  const existingUser = await findExistingUserByUsernameOrEmail(username, email);
+  const normalizedEmail = normalizeEmail(email);
+
+  let existingUser = await findExistingUserByUsernameOrEmail({
+    username: username,
+    email: email,
+  });
+  if (existingUser) throw new Error("User already exists");
+
+  existingUser = await findExistingUserByUsernameOrEmail({
+    email: normalizedEmail,
+  });
   if (existingUser) throw new Error("User already exists");
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const newUser = await createLocalUser({
     username,
-    email,
+    email: email,
+    normalizedEmail: normalizedEmail!,
     password: hashedPassword,
   });
 
@@ -36,11 +48,22 @@ const registerUser = async ({
 };
 
 const loginUser = async ({
-  username,
+  usernameOrEmail,
   password,
   jwtSecretKey,
 }: LoginUserInput): Promise<{ token: string }> => {
-  const user = await findUserByUsername(username);
+  let user = await findExistingUserByUsernameOrEmail({
+    usernameOrEmail,
+  });
+  if (!user) {
+    const normalizedEmail = normalizeEmail(usernameOrEmail);
+
+    if (normalizedEmail) {
+      user = await findExistingUserByUsernameOrEmail({
+        normalizedEmail: normalizedEmail,
+      });
+    }
+  }
 
   if (!user || !user.password) {
     throw new Error("Invalid credentials");

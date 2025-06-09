@@ -1,7 +1,11 @@
 // --- services/recovery.service.ts ---
 
 import { loadConfig } from "../lib";
-import { generateVerificationCode, sendPasswordResetEmail } from "../lib/utils";
+import {
+  generateVerificationCode,
+  normalizeEmail,
+  sendPasswordResetEmail,
+} from "../lib/utils";
 import { VerificationCodeModel } from "../modals/VerificationCode";
 import { findExistingUserByUsernameOrEmail } from "./user.services";
 
@@ -27,8 +31,10 @@ const resendVerificationEmail = async (email: string) => {
 
 const requestPasswordReset = async (usernameOrEmail: string) => {
   const config = loadConfig();
+  const normalizedEmail = normalizeEmail(usernameOrEmail);
   const user = await findExistingUserByUsernameOrEmail({
-    usernameOrEmail,
+    username: usernameOrEmail,
+    email: normalizedEmail,
   });
 
   if (!user || !user.email) {

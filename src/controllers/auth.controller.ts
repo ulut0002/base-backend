@@ -16,6 +16,7 @@ import {
   loadConfig,
 } from "../lib";
 import { MessageCodes, MessageTexts } from "../lib/constants";
+import { normalizeEmail } from "../lib/utils";
 
 /**
  * Configures Passport.js with JWT strategy.
@@ -62,13 +63,16 @@ const configureJwtStrategy = (passport: PassportStatic) => {
  * - Issues a JWT token and sets it in an HTTP-only cookie.
  */
 const register = async (req: Request, res: Response): Promise<void> => {
-  const { username = "", email = "", password = "", name = "" } = req.body;
+  let { username = "", email = "", password = "", name = "" } = req.body;
+  username = username.trim();
+  email = email.trim().toLowerCase();
+  const normalizedEmail = normalizeEmail(email);
 
   const envConfig = loadConfig();
 
   const errors = createValidationErrorCollector();
   errors.add("username", username, MessageCodes.REQUIRED_FIELD);
-  errors.add("email", email, MessageCodes.REQUIRED_FIELD);
+  errors.add("email", normalizedEmail, MessageCodes.REQUIRED_FIELD);
   errors.add("password", password, MessageCodes.REQUIRED_FIELD);
 
   // Validate required fields
@@ -130,7 +134,8 @@ const register = async (req: Request, res: Response): Promise<void> => {
  * - Sets JWT token in HTTP-only cookie on success.
  */
 const login = async (req: Request, res: Response): Promise<void> => {
-  const { username, password } = req.body;
+  let { username, password } = req.body;
+  username = username.trim();
   const errors = createValidationErrorCollector();
 
   // Validate inputs
@@ -159,7 +164,7 @@ const login = async (req: Request, res: Response): Promise<void> => {
 
   try {
     const { token } = await loginUser({
-      username,
+      usernameOrEmail: username,
       password,
       jwtSecretKey: jwtSecretKey!,
     });

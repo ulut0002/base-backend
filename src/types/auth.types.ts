@@ -3,12 +3,13 @@
 interface RegisterUserInput {
   username: string;
   email: string;
+  normalizedEmail?: string;
   password: string;
   jwtSecretKey: string;
 }
 
 interface LoginUserInput {
-  username: string;
+  usernameOrEmail: string;
   password: string;
   jwtSecretKey: string;
 }

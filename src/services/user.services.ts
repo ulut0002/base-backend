@@ -18,23 +18,48 @@ const findUserByUsername = async (username: string) => {
 const findUserById = async (userId: string) => {
   return await UserModel.findById({ _id: userId });
 };
-
 /**
- * Finds a user by matching the given value against username or email.
- * Useful for login or password reset where either field is accepted.
- * @param params.usernameOrEmail - A string representing either the username or email.
+ * Finds a user by matching against username, email, or a combined field.
+ * Useful for login, registration checks, or password reset flows.
+ *
+ * @param params.usernameOrEmail - A value that could be either username or email.
+ * @param params.username - Optional explicit username.
+ * @param params.email - Optional explicit email.
  * @returns The matched user document, or null if not found.
  */
 const findExistingUserByUsernameOrEmail = async ({
   usernameOrEmail,
+  username,
+  email,
+  normalizedEmail,
 }: {
-  usernameOrEmail: string;
+  usernameOrEmail?: string | null;
+  username?: string | null;
+  email?: string | null;
+  normalizedEmail?: string | null;
 }) => {
-  if (!usernameOrEmail) return null;
+  const orConditions = [];
 
-  return await UserModel.findOne({
-    $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
-  });
+  if (usernameOrEmail) {
+    orConditions.push(
+      { username: usernameOrEmail },
+      { email: usernameOrEmail }
+    );
+  }
+  if (username) {
+    orConditions.push({ username });
+  }
+  if (email) {
+    orConditions.push({ email });
+  }
+
+  if (normalizedEmail) {
+    orConditions.push({ normalizedEmail });
+  }
+
+  if (orConditions.length === 0) return null;
+
+  return await UserModel.findOne({ $or: orConditions });
 };
 
 /**

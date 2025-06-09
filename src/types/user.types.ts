@@ -8,6 +8,7 @@ import { Document } from "mongoose";
 interface UserRegistrationDTO {
   username?: string;
   email?: string;
+  normalizedEmail?: string;
   password: string;
 }
 
@@ -19,6 +20,7 @@ interface NewUserInput {
   username?: string;
   name?: string;
   email?: string;
+  normalizedEmail?: string;
   password: string;
   facebookId?: string;
   googleId?: string;

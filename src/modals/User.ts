@@ -15,6 +15,7 @@ const userSchema = new Schema<UserDocument>(
     // Common fields
     name: { type: String },
     email: { type: String, unique: true, sparse: true }, // Can be optional for some OAuth providers
+    normalizedEmail: { type: String, unique: true, sparse: true }, // Normalized email for case-insensitive lookups
 
     // For local strategy (email/password based)
     password: { type: String }, // Stored as a bcrypt hash
