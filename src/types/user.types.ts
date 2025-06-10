@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
 /**
  * DTO for registering a user via web (e.g., REST or form).
@@ -33,7 +33,9 @@ interface NewUserInput {
  * Represents the MongoDB user document, extending input with DB-specific metadata.
  */
 interface UserDocument extends NewUserInput, Document {
+  _id: Types.ObjectId;
   lastLogin?: Date;
+  userRole: string; // e.g., "admin", "user", etc.
 }
 
 export type { UserRegistrationDTO, NewUserInput, UserDocument };

@@ -1,7 +1,7 @@
 // src/models/User.ts
 
 import { Schema, model } from "mongoose";
-import { UserDocument, UserRegistrationDTO } from "../types";
+import { UserDocument, UserRole } from "../types";
 
 /**
  * Mongoose schema definition for the User model.
@@ -29,6 +29,11 @@ const userSchema = new Schema<UserDocument>(
     // Optional user profile info
     profilePicture: { type: String },
     lastLogin: { type: Date },
+    userRole: {
+      type: String,
+      enum: Object.values(UserRole), // Define your roles here
+      default: UserRole.USER, // Default role for new users
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields automatically
@@ -36,5 +41,5 @@ const userSchema = new Schema<UserDocument>(
 );
 
 // Create and export the Mongoose model
-const UserModel = model<UserRegistrationDTO>("User", userSchema);
+const UserModel = model<UserDocument>("User", userSchema);
 export { UserModel };

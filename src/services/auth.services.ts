@@ -1,10 +1,16 @@
 import { normalizeEmail } from "../lib/utils";
-import { LoginUserInput, RegisterUserInput } from "../types";
+import { UserModel } from "../modals";
+import {
+  LoginUserInput,
+  RegisterUserInput,
+  SessionData,
+  UserDocument,
+  UserRole,
+} from "../types";
 import {
   createLocalUser,
   findExistingUserByUsernameOrEmail,
   findUserById,
-  findUserByUsername,
 } from "./user.services";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -36,13 +42,9 @@ const registerUser = async ({
     password: hashedPassword,
   });
 
-  const token = jwt.sign(
-    { sub: newUser._id, username: newUser.username },
-    jwtSecretKey,
-    {
-      expiresIn: "1h",
-    }
-  );
+  const token = jwt.sign(createSessionObject(newUser), jwtSecretKey, {
+    expiresIn: "1h",
+  });
 
   return { token };
 };
@@ -74,13 +76,9 @@ const loginUser = async ({
     throw new Error("Invalid credentials");
   }
 
-  const token = jwt.sign(
-    { sub: user._id, username: user.username },
-    jwtSecretKey,
-    {
-      expiresIn: "1h",
-    }
-  );
+  const token = jwt.sign(createSessionObject(user), jwtSecretKey, {
+    expiresIn: "1h",
+  });
 
   return { token };
 };
@@ -112,6 +110,14 @@ const changeUserPassword = async ({
   const hashedNew = await bcrypt.hash(newPassword, 10);
   existingUser.password = hashedNew;
   await existingUser.save();
+};
+
+export const createSessionObject = (user: UserDocument): SessionData => {
+  return {
+    sub: user._id.toString(),
+    username: user.username || "",
+    role: user.userRole || UserRole.USER, // Fallback role
+  };
 };
 
 export { registerUser, loginUser, changeUserPassword };

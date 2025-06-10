@@ -1,3 +1,3 @@
-import { ensureBody } from "./request.middleware";
+import { checkRole, ensureBody } from "./request.middleware";
 
-export { ensureBody };
+export { ensureBody, checkRole };

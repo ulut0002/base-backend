@@ -11,6 +11,8 @@ import {
   checkAuthStatus,
   refreshToken,
 } from "../controllers";
+import { checkRole } from "../middleware";
+import { UserRole } from "../types";
 
 const authRouter: Router = express.Router();
 

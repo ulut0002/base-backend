@@ -22,9 +22,22 @@ type VerificationCodeType =
 
 type VerificationCodeStatus = "PENDING" | "VERIFIED" | "EXPIRED";
 
+export enum UserRole {
+  SUPERADMIN = "superadmin",
+  ADMIN = "admin",
+  USER = "user",
+}
+
+type SessionData = {
+  sub: string; // User ID
+  username: string; // Username
+  role: string; // User role
+};
+
 export type {
   RegisterUserInput,
   LoginUserInput,
   VerificationCodeType,
   VerificationCodeStatus,
+  SessionData,
 };
