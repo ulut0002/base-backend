@@ -1,27 +1,24 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
-import rateLimit from "express-rate-limit";
 import helmet from "helmet";
-import csurf from "csurf";
 import multer from "multer";
 import morgan from "morgan";
-import winston from "winston";
 import configPackage from "config";
-import swaggerUi from "swagger-ui-express";
-import swaggerJsdoc from "swagger-jsdoc";
-import i18next from "i18next";
-import i18nextMiddleware from "i18next-express-middleware";
-import Backend from "i18next-fs-backend";
-import cron from "node-cron";
 import { Server } from "socket.io";
 import http from "http";
+import "./jobs/scheduler";
 
-import { ensureBody } from "./middleware";
+import {
+  ensureBody,
+  generalLimiter,
+  i18nMiddleware,
+  swaggerRouter,
+} from "./middleware";
 import {
   adminRouter,
   authRouter,
@@ -32,7 +29,7 @@ import {
 } from "./routes";
 import { configureJwtStrategy } from "./controllers";
 import passport from "passport";
-import { getBackendUrl, loadConfig } from "./lib";
+import { getBackendUrl, loadConfig, logger } from "./lib";
 
 // Load environment variables
 dotenv.config();
@@ -51,11 +48,6 @@ const io = new Server(server, {
 
 // Configure Passport
 configureJwtStrategy(passport);
-
-// Setup Winston logger
-const logger = winston.createLogger({
-  transports: [new winston.transports.Console()],
-});
 
 // Connect to MongoDB
 if (config.BACKEND_MONGODB_URI) {
@@ -84,15 +76,7 @@ app.use(morgan("dev"));
 app.use(helmet());
 
 // Rate limiter
-app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-  })
-);
-
-// CSRF protection (enable only for state-changing routes)
-app.use(csurf({ cookie: true }));
+app.use(generalLimiter);
 
 // Enable CORS
 app.use(
@@ -112,35 +96,9 @@ app.use(ensureBody);
 // Multer setup (example, use as needed)
 const upload = multer({ dest: "uploads/" });
 
-// -------------------------
-// i18n Middleware
-// -------------------------
-i18next
-  .use(Backend)
-  .use(i18nextMiddleware.LanguageDetector)
-  .init({
-    fallbackLng: "en",
-    preload: ["en", "tr"], // preload your supported languages
-    backend: {
-      loadPath: __dirname + "/locales/{{lng}}/translation.json",
-    },
-  });
-app.use(i18nextMiddleware.handle(i18next));
+app.use(i18nMiddleware);
 
-// -------------------------
-// Swagger Documentation
-// -------------------------
-const swaggerSpec = swaggerJsdoc({
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "Your API",
-      version: "1.0.0",
-    },
-  },
-  apis: ["./routes/*.ts"],
-});
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/docs", swaggerRouter);
 
 // -------------------------
 // Routes
@@ -153,13 +111,6 @@ app.use("/admin", adminRouter);
 app.use("/recovery", recoveryRouter);
 
 // -------------------------
-// Background Job Example
-// -------------------------
-cron.schedule("0 0 * * *", () => {
-  logger.info("Daily scheduled task running.");
-});
-
-// -------------------------
 // Socket.IO Example
 // -------------------------
 io.on("connection", (socket) => {
@@ -170,9 +121,27 @@ io.on("connection", (socket) => {
   });
 });
 
+app.use((req: Request, res: Response) => {
+  res.status(404).json({ error: "Route not found" });
+});
+
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  logger.error(err);
+  res.status(500).json({ error: "Internal server error" });
+});
+
 // -------------------------
 // Start Server
 // -------------------------
 server.listen(PORT, () => {
   logger.info(`Server running at ${backendUrl}`);
+});
+
+process.on("SIGINT", async () => {
+  logger.info("Shutting down gracefully...");
+  await mongoose.disconnect();
+  server.close(() => {
+    logger.info("HTTP server closed");
+    process.exit(0);
+  });
 });
