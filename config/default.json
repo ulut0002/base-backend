@@ -1,0 +1,19 @@
+{
+  "backend": {
+    "url": "http://localhost",
+    "port": 4000,
+    "mongodbUri": "mongodb://localhost:27017/auth",
+    "jwtSecretKey": "${process:env:BACKEND_JWT_SECRET_KEY}"
+  },
+  "passwordReset": {
+    "windowMinutes": 10,
+    "rateLimit": 5
+  },
+  "nodemailer": {
+    "host": "smtp.gmail.com",
+    "port": 587,
+    "user": "${env:NODEMAILER_USER}",
+    "pass": "${env:NODEMAILER_PASS}",
+    "emailFrom": "Serdar Ulutas"
+  }
+}
