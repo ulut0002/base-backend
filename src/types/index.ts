@@ -1,4 +1,9 @@
-import { UserRegistrationDTO, NewUserInput, UserDocument } from "./user.types";
+import {
+  UserRegistrationDTO,
+  NewUserInput,
+  UserDocument,
+  LinkedObject,
+} from "./user.types";
 import { NormalizeOptions } from "./email.types";
 import {
   RegisterUserInput,
@@ -9,7 +14,7 @@ import {
   SessionData,
 } from "./auth.types";
 
-export type { UserRegistrationDTO, NewUserInput, UserDocument };
+export type { UserRegistrationDTO, NewUserInput, UserDocument, LinkedObject };
 export type {
   RegisterUserInput,
   LoginUserInput,

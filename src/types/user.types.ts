@@ -12,6 +12,13 @@ interface UserRegistrationDTO {
   password: string;
 }
 
+interface LinkedObject {
+  key: string;
+  data: Record<string, any>;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 /**
  * Represents the full input shape for creating a user,
  * including optional OAuth fields.
@@ -27,6 +34,7 @@ interface NewUserInput {
   githubId?: string;
   linkedinId?: string;
   profilePicture?: string;
+  linkedObjects?: LinkedObject[];
 }
 
 /**
@@ -34,8 +42,10 @@ interface NewUserInput {
  */
 interface UserDocument extends NewUserInput, Document {
   _id: Types.ObjectId;
+  linkedObjects?: LinkedObject[];
+
   lastLogin?: Date;
   userRole: string; // e.g., "admin", "user", etc.
 }
 
-export type { UserRegistrationDTO, NewUserInput, UserDocument };
+export type { UserRegistrationDTO, NewUserInput, UserDocument, LinkedObject };

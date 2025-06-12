@@ -1,7 +1,15 @@
 // src/models/User.ts
 
 import { Schema, model } from "mongoose";
-import { UserDocument, UserRole } from "../types";
+import { LinkedObject, UserDocument, UserRole } from "../types";
+
+const linkedObjectSchema = new Schema(
+  {
+    key: { type: String, required: true },
+    data: { type: Schema.Types.Mixed, required: true },
+  },
+  { timestamps: true, _id: false } // _id: false if you don't want an ObjectId for each
+);
 
 /**
  * Mongoose schema definition for the User model.
@@ -28,6 +36,7 @@ const userSchema = new Schema<UserDocument>(
 
     // Optional user profile info
     profilePicture: { type: String },
+    linkedObjects: { type: [linkedObjectSchema], default: [] },
     lastLogin: { type: Date },
     userRole: {
       type: String,
@@ -39,6 +48,23 @@ const userSchema = new Schema<UserDocument>(
     timestamps: true, // Adds createdAt and updatedAt fields automatically
   }
 );
+
+userSchema.index({ "linkedObjects.key": 1 });
+
+userSchema.methods.getLinkedObjectsByKey = function (
+  this: UserDocument,
+  key: string
+): LinkedObject[] {
+  return this.linkedObjects?.filter((obj) => obj.key === key) || [];
+};
+
+userSchema.methods.addLinkedObject = function (
+  this: UserDocument,
+  newObj: LinkedObject
+): Promise<UserDocument> {
+  this.linkedObjects?.push(newObj);
+  return this.save();
+};
 
 // Create and export the Mongoose model
 const UserModel = model<UserDocument>("User", userSchema);
