@@ -45,10 +45,10 @@ importers:
         specifier: ^8.1.0
         version: 8.1.0
       i18next:
-        specifier: ^25.2.1
-        version: 25.2.1(typescript@5.8.3)
+        specifier: ^22.4.9
+        version: 22.4.9
       i18next-express-middleware:
-        specifier: ^2.0.0
+        specifier: 2.0.0
         version: 2.0.0
       i18next-fs-backend:
         specifier: ^2.6.0
@@ -1454,13 +1454,8 @@ packages:
   i18next-fs-backend@2.6.0:
     resolution: {integrity: sha512-3ZlhNoF9yxnM8pa8bWp5120/Ob6t4lVl1l/tbLmkml/ei3ud8IWySCHt2lrY5xWRlSU5D9IV2sm5bEbGuTqwTw==}
 
-  i18next@25.2.1:
-    resolution: {integrity: sha512-+UoXK5wh+VlE1Zy5p6MjcvctHXAhRwQKCxiJD8noKZzIXmnAX8gdHX5fLPA3MEVxEN4vbZkQFy8N0LyD9tUqPw==}
-    peerDependencies:
-      typescript: ^5
-    peerDependenciesMeta:
-      typescript:
-        optional: true
+  i18next@22.4.9:
+    resolution: {integrity: sha512-8gWMmUz460KJDQp/ob3MNUX84cVuDRY9PLFPnV8d+Qezz/6dkjxwOaH70xjrCNDO+JrUL25iXfAIN9wUkInNZw==}
 
   iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
@@ -4061,11 +4056,9 @@ snapshots:
 
   i18next-fs-backend@2.6.0: {}
 
-  i18next@25.2.1(typescript@5.8.3):
+  i18next@22.4.9:
     dependencies:
       '@babel/runtime': 7.27.6
-    optionalDependencies:
-      typescript: 5.8.3
 
   iconv-lite@0.6.3:
     dependencies:

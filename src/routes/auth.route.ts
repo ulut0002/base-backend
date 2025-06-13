@@ -11,43 +11,108 @@ import {
   checkAuthStatus,
   refreshToken,
 } from "../controllers";
-import { checkRole } from "../middleware";
-import { UserRole } from "../types";
 
 const authRouter: Router = express.Router();
 
 /**
- * @route   POST /auth/login
- * @desc    Logs in a user and issues a JWT as an HttpOnly cookie.
- * @access  Public
+ * @openapi
+ * /auth/login:
+ *   post:
+ *     summary: Logs in a user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: JWT issued as HttpOnly cookie
  */
 authRouter.post("/login", login);
 
 /**
- * @route   POST /auth/register
- * @desc    Creates a new user account and issues a JWT as an HttpOnly cookie.
- * @access  Public
+ * @openapi
+ * /auth/register:
+ *   post:
+ *     summary: Registers a new user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, email, password]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User created and JWT issued
  */
 authRouter.post("/register", register);
 
 /**
- * @route   GET /auth/me
- * @desc    Returns the authenticated user's public profile.
- * @access  Protected - requires a valid JWT in the cookie.
+ * @openapi
+ * /auth/me:
+ *   get:
+ *     summary: Get current user's profile
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile data
  */
 authRouter.get("/me", passport.authenticate("jwt", { session: false }), me);
 
 /**
- * @route   POST /auth/logout
- * @desc    Logs the user out by clearing the JWT cookie.
- * @access  Optional protection — works even if the user is already logged out.
+ * @openapi
+ * /auth/logout:
+ *   post:
+ *     summary: Logs the user out
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: JWT cookie cleared
  */
 authRouter.post("/logout", logout);
 
 /**
- * @route   POST /auth/change-password
- * @desc    Allows a logged-in user to change their password.
- * @access  Protected
+ * @openapi
+ * /auth/change-password:
+ *   post:
+ *     summary: Change user password
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [oldPassword, newPassword]
+ *             properties:
+ *               oldPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
  */
 authRouter.post(
   "/change-password",
@@ -56,16 +121,28 @@ authRouter.post(
 );
 
 /**
- * @route   POST /auth/refresh-token
- * @desc    Issues a new access token using the refresh token.
- * @access  Public
+ * @openapi
+ * /auth/refresh-token:
+ *   post:
+ *     summary: Refresh access token
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: New JWT issued
  */
 authRouter.post("/refresh-token", refreshToken);
 
 /**
- * @route   GET /auth/status
- * @desc    Returns authentication status of the current session.
- * @access  Protected
+ * @openapi
+ * /auth/status:
+ *   get:
+ *     summary: Check current authentication status
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Authenticated user session info
  */
 authRouter.get(
   "/status",

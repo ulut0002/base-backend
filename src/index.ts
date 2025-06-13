@@ -10,6 +10,7 @@ import {
   recoveryRouter,
   rootRouter,
   securityRouter,
+  swaggerRoute,
 } from "./routes";
 import { configureJwtStrategy } from "./controllers";
 import passport from "passport";
@@ -67,6 +68,7 @@ app.use("/profile", meRouter); // User profile (JWT-protected)
 app.use("/security", securityRouter); // Security settings like 2FA
 app.use("/admin", adminRouter); // Admin-only operations
 app.use("/recovery", recoveryRouter); // Password recovery and reset flows
+app.use("/docs", swaggerRoute);
 
 // -------------------------
 // 404 Handler for Unmatched Routes

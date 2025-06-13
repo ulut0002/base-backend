@@ -7,12 +7,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import passport from "passport";
 import multer from "multer";
-import {
-  ensureBody,
-  generalLimiter,
-  i18nMiddleware,
-  swaggerRouter,
-} from "../middleware";
+import { ensureBody, generalLimiter, i18nMiddleware } from "../middleware";
 import { getBackendUrl } from "../lib";
 
 /**
@@ -77,13 +72,11 @@ const configureApp = (app: express.Express) => {
   // Internationalization
   // -------------------------
 
-  app.use(i18nMiddleware); // Sets up language detection and translation support
+  // app.use(i18nMiddleware); // Sets up language detection and translation support
 
   // -------------------------
   // API Documentation
   // -------------------------
-
-  app.use("/docs", swaggerRouter); // Serves Swagger UI at /docs
 };
 
 export { configureApp };

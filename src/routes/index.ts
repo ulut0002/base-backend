@@ -4,6 +4,7 @@ import { recoveryRouter } from "./recover.route";
 import { rootRouter } from "./root.route";
 import { securityRouter } from "./security.route";
 import { adminRouter } from "./admin.route";
+import { swaggerRoute } from "./swagger.route";
 
 export {
   authRouter,
@@ -12,4 +13,5 @@ export {
   securityRouter,
   adminRouter,
   recoveryRouter,
+  swaggerRoute,
 };
