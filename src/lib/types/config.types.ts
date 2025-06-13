@@ -17,4 +17,6 @@ type EnvConfig = Partial<{
   NODEMAILER_USER: string; // SMTP user for authentication
   NODEMAILER_PASS: string; // SMTP password for authentication
   NODEMAILER_EMAIL_FROM: string; // Default "from" email address for sending emails
+
+  ENABLE_SOCKET_IO: boolean; // Whether to enable Socket.IO support
 }>;

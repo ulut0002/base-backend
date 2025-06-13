@@ -1,24 +1,8 @@
 import express, { NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
-import mongoose from "mongoose";
-import cors from "cors";
-import compression from "compression";
-import cookieParser from "cookie-parser";
-import bodyParser from "body-parser";
-import helmet from "helmet";
-import multer from "multer";
-import morgan from "morgan";
-import configPackage from "config";
-import { Server } from "socket.io";
-import http from "http";
+
 import "./jobs/scheduler";
 
-import {
-  ensureBody,
-  generalLimiter,
-  i18nMiddleware,
-  swaggerRouter,
-} from "./middleware";
 import {
   adminRouter,
   authRouter,
@@ -29,101 +13,72 @@ import {
 } from "./routes";
 import { configureJwtStrategy } from "./controllers";
 import passport from "passport";
-import { getBackendUrl, loadConfig, logger } from "./lib";
+import {
+  configureApp,
+  connectToDatabase,
+  disconnectFromDatabase,
+  getBackendUrl,
+  loadConfig,
+  logger,
+} from "./lib";
+import { createSocketServer } from "./lib/sockets";
 
-// Load environment variables
+// -------------------------
+// Load Environment Variables and Config
+// -------------------------
+
 dotenv.config();
 const config = loadConfig();
 const backendUrl = getBackendUrl();
 const PORT = config.BACKEND_PORT || process.env.PORT || 3000;
 
+// -------------------------
+// Initialize Express and Socket.IO
+// -------------------------
+
 const app = express();
-const server = http.createServer(app); // needed for socket.io
-const io = new Server(server, {
-  cors: {
-    origin: backendUrl,
-    credentials: true,
-  },
-});
+const { server } = createSocketServer(app); // Creates HTTP server and binds Socket.IO
 
-// Configure Passport
-configureJwtStrategy(passport);
+// -------------------------
+// Configure Authentication (Passport)
+// -------------------------
 
+configureJwtStrategy(passport); // JWT strategy setup for protected routes
+
+// -------------------------
 // Connect to MongoDB
-if (config.BACKEND_MONGODB_URI) {
-  mongoose.Promise = Promise;
-  mongoose.connect(config.BACKEND_MONGODB_URI);
+// -------------------------
 
-  mongoose.connection.on("error", (err: Error) => {
-    logger.error("MongoDB connection error:", err);
-  });
-
-  mongoose.connection.on("connected", () => {
-    logger.info("MongoDB connected");
-  });
-} else {
-  logger.error("MongoDB URI is not defined in environment variables.");
-}
+connectToDatabase(); // Establishes connection using Mongoose
 
 // -------------------------
 // Middleware Setup
 // -------------------------
 
-// Logging HTTP requests
-app.use(morgan("dev"));
-
-// Apply security headers
-app.use(helmet());
-
-// Rate limiter
-app.use(generalLimiter);
-
-// Enable CORS
-app.use(
-  cors({
-    origin: backendUrl,
-    credentials: true,
-  })
-);
-
-app.use(compression());
-app.use(cookieParser());
-app.use(bodyParser.json());
-app.use(express.json());
-app.use(passport.initialize());
-app.use(ensureBody);
-
-// Multer setup (example, use as needed)
-const upload = multer({ dest: "uploads/" });
-
-app.use(i18nMiddleware);
-
-app.use("/docs", swaggerRouter);
+configureApp(app); // Applies body parsing, CORS, helmet, rate limiting, etc.
 
 // -------------------------
-// Routes
+// Route Handlers
 // -------------------------
-app.use("/", rootRouter);
-app.use("/auth", authRouter);
-app.use("/profile", meRouter);
-app.use("/security", securityRouter);
-app.use("/admin", adminRouter);
-app.use("/recovery", recoveryRouter);
+
+app.use("/", rootRouter); // Public landing or status endpoint
+app.use("/auth", authRouter); // Login, register, logout, token logic
+app.use("/profile", meRouter); // User profile (JWT-protected)
+app.use("/security", securityRouter); // Security settings like 2FA
+app.use("/admin", adminRouter); // Admin-only operations
+app.use("/recovery", recoveryRouter); // Password recovery and reset flows
 
 // -------------------------
-// Socket.IO Example
+// 404 Handler for Unmatched Routes
 // -------------------------
-io.on("connection", (socket) => {
-  logger.info("A user connected:", socket.id);
-
-  socket.on("disconnect", () => {
-    logger.info("User disconnected:", socket.id);
-  });
-});
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({ error: "Route not found" });
 });
+
+// -------------------------
+// Global Error Handler
+// -------------------------
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   logger.error(err);
@@ -131,15 +86,20 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 });
 
 // -------------------------
-// Start Server
+// Start HTTP + Socket.IO Server
 // -------------------------
+
 server.listen(PORT, () => {
   logger.info(`Server running at ${backendUrl}`);
 });
 
+// -------------------------
+// Graceful Shutdown Handler
+// -------------------------
+
 process.on("SIGINT", async () => {
   logger.info("Shutting down gracefully...");
-  await mongoose.disconnect();
+  await disconnectFromDatabase();
   server.close(() => {
     logger.info("HTTP server closed");
     process.exit(0);

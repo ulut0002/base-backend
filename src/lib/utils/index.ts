@@ -1,4 +1,5 @@
 import { assertConfigVarsExist } from "./environment.utils";
+import { isTrue } from "./eval";
 import { sendPasswordResetEmail, normalizeEmail } from "./mail.utils";
 import { generateVerificationCode } from "./password.utils";
 
@@ -7,4 +8,5 @@ export {
   sendPasswordResetEmail,
   assertConfigVarsExist,
   normalizeEmail,
+  isTrue,
 };

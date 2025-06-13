@@ -1,3 +1,5 @@
+import { isTrue } from "./utils";
+
 let _cachedConfig: EnvConfig | null = null;
 
 /**
@@ -25,6 +27,8 @@ function loadConfig(): EnvConfig {
     NODEMAILER_USER: process.env.NODEMAILER_USER, // SMTP user for authentication
     NODEMAILER_PASS: process.env.NODEMAILER_PASS, //
     NODEMAILER_EMAIL_FROM: process.env.NODEMAILER_EMAIL_FROM,
+
+    ENABLE_SOCKET_IO: isTrue(process.env.ENABLE_SOCKET_IO),
   };
   return _cachedConfig;
 }
