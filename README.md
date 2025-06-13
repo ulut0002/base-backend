@@ -40,14 +40,14 @@ This uses ts-node-dev or a similar tool to run the app with automatic restarts.
 
 Build and run the compiled output:
 
-````bash
+```bash
 pnpm run build
-pnpm start```
-
-
+pnpm start
+```
 
 ## Project Structure
-````
+
+```
 
 src/
 ├── controllers/ # Passport strategies and logic
@@ -57,11 +57,9 @@ src/
 ├── routes/ # Express route definitions
 ├── index.ts # Main entry point
 
-````
-
+```
 
 ##Routes
-
 
 `/`: Root route or health check
 `/auth`: Login, register, and JWT handling
@@ -71,16 +69,15 @@ src/
 `/recovery`: Password recovery/reset flows
 `/docs`: Swagger API documentation (if enabled)
 
-
-
 ## Configuration
+
 All configuration is loaded via .env and config/. Ensure your .env file includes:
 
 ```env
 BACKEND_PORT=4000
 BACKEND_MONGODB_URI=mongodb://localhost:27017/yourdbname
 BACKEND_JWT_SECRET_KEY=yourSecretKey
-````
+```
 
 ## WebSockets
 
