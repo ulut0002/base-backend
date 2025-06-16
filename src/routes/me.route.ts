@@ -1,3 +1,5 @@
+// src/routes/me.ts
+
 import express, { Router } from "express";
 import passport from "passport";
 import {
@@ -20,16 +22,40 @@ const meRouter: Router = express.Router();
  */
 
 /**
- * @route   GET /me/
- * @desc    Retrieve the profile of the currently authenticated user.
- * @access  Protected (JWT required)
+ * @openapi
+ * /me:
+ *   get:
+ *     summary: Get the authenticated user's profile
+ *     tags: [Me]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile retrieved
  */
 meRouter.get("/", passport.authenticate("jwt", { session: false }), profile);
 
 /**
- * @route   PUT /me/email
- * @desc    Update the email address of the authenticated user.
- * @access  Protected (JWT required)
+ * @openapi
+ * /me/email:
+ *   put:
+ *     summary: Update the authenticated user's email
+ *     tags: [Me]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Email updated successfully
  */
 meRouter.put(
   "/email",
@@ -38,9 +64,26 @@ meRouter.put(
 );
 
 /**
- * @route   PUT /me/username
- * @desc    Update the username of the authenticated user.
- * @access  Protected (JWT required)
+ * @openapi
+ * /me/username:
+ *   put:
+ *     summary: Update the authenticated user's username
+ *     tags: [Me]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [username]
+ *             properties:
+ *               username:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Username updated successfully
  */
 meRouter.put(
   "/username",
@@ -49,9 +92,16 @@ meRouter.put(
 );
 
 /**
- * @route   POST /me/deactivate
- * @desc    Soft-delete the account (can be reactivated later).
- * @access  Protected (JWT required)
+ * @openapi
+ * /me/deactivate:
+ *   post:
+ *     summary: Deactivate the authenticated user's account
+ *     tags: [Me]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Account deactivated successfully
  */
 meRouter.post(
   "/deactivate",
@@ -60,9 +110,16 @@ meRouter.post(
 );
 
 /**
- * @route   POST /me/reactivate
- * @desc    Reactivate a previously deactivated account.
- * @access  Protected (JWT required)
+ * @openapi
+ * /me/reactivate:
+ *   post:
+ *     summary: Reactivate a previously deactivated account
+ *     tags: [Me]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Account reactivated successfully
  */
 meRouter.post(
   "/reactivate",
@@ -71,10 +128,30 @@ meRouter.post(
 );
 
 /**
- * @route   PATCH /me/:id
- * @desc    Update additional user details (if supported).
- * @access  Protected (JWT required)
- * @note    :id should match the authenticated user ID
+ * @openapi
+ * /me/{id}:
+ *   patch:
+ *     summary: Update additional user details
+ *     tags: [Me]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID (should match the authenticated user)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             additionalProperties: true
+ *     responses:
+ *       200:
+ *         description: User details updated
  */
 meRouter.patch(
   "/:id",
@@ -83,9 +160,23 @@ meRouter.patch(
 );
 
 /**
- * @route   DELETE /me/:id
- * @desc    Permanently delete the user account (cannot be undone).
- * @access  Protected (JWT required)
+ * @openapi
+ * /me/{id}:
+ *   delete:
+ *     summary: Permanently delete the authenticated user's account
+ *     tags: [Me]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID (should match the authenticated user)
+ *     responses:
+ *       200:
+ *         description: Account deleted successfully
  */
 meRouter.delete(
   "/:id",
@@ -100,9 +191,23 @@ meRouter.delete(
  */
 
 /**
- * @route   GET /me/users/public/:username
- * @desc    Retrieve the public profile of any user by username.
- * @access  Public
+ * @openapi
+ * /me/users/public/{username}:
+ *   get:
+ *     summary: Get a public user profile by username
+ *     tags: [Me]
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The username of the public profile to fetch
+ *     responses:
+ *       200:
+ *         description: Public profile data
+ *       404:
+ *         description: User not found
  */
 meRouter.get("/users/public/:username", fetchPublicProfile);
 

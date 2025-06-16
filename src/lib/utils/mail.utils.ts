@@ -35,7 +35,11 @@ const getFromEmail = (): string => {
   return fromEmail || "";
 };
 
-const sendPasswordResetEmail = async (to: string, code: string) => {
+const sendPasswordResetEmail = async (
+  to: string,
+  code: string,
+  linkToken: string
+) => {
   const transporter = createTransporter();
   let fromEmail = getFromEmail();
 

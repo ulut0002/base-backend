@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import logger from "../lib/logger";
+import { logger } from "../lib";
 
 // -------------------------
 // Background Job Scheduler

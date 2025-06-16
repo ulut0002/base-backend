@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 export function generateVerificationCode(
   length: number = parseInt(process.env.VERIFICATION_CODE_LENGTH || "5", 10),
   digits: string = "0123456789"
@@ -7,4 +9,8 @@ export function generateVerificationCode(
     code += digits[Math.floor(Math.random() * digits.length)];
   }
   return code;
+}
+
+export function generatePasswordResetToken(): string {
+  return crypto.randomBytes(32).toString("hex");
 }

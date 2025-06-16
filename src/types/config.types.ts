@@ -7,6 +7,8 @@ type EnvConfig = Partial<{
   BACKEND_PORT: string; // Port number backend listens on (e.g. 3000)
   BACKEND_MONGODB_URI: string; // MongoDB connection string
   BACKEND_JWT_SECRET_KEY: string; // Secret key used for signing JWTs
+  COOKIE_NAME: string; // Name of the HTTP-only cookie used for JWTs
+  COOKIE_EXPIRATION_MINUTES: number; // Expiration time for the JWT cookie in minutes
 
   PASSWORD_RESET_WINDOW_MINUTES: number;
   PASSWORD_RESET_RATE_LIMIT: number; // Rate limit for password reset requests
@@ -20,3 +22,5 @@ type EnvConfig = Partial<{
 
   ENABLE_SOCKET_IO: boolean; // Whether to enable Socket.IO support
 }>;
+
+export type { EnvConfig };

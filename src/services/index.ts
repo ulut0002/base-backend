@@ -5,6 +5,7 @@ import {
   sendForgotPasswordEmail,
   sendVerificationEmail,
   verifyUserAccount,
+  deleteExpiredVerificationCodes,
 } from "./recovery.services";
 import {
   listActiveSessions,
@@ -51,4 +52,5 @@ export {
   sendVerificationEmail,
   verifyUserAccount,
   resendVerificationEmail,
+  deleteExpiredVerificationCodes,
 };

@@ -1,5 +1,5 @@
 // Load environment-specific configuration values (e.g., JWT secret).
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import {
   changeUserPassword,
@@ -10,13 +10,14 @@ import {
 
 import { StrategyOptions, Strategy as JwtStrategy } from "passport-jwt";
 import { PassportStatic } from "passport";
+import { ApiError, BadRequestError, createErrorIf, loadConfig } from "../lib";
+import { ErrorCodes, MessageCodes, MessageTexts } from "../lib/constants";
 import {
-  createErrorResponse,
-  createValidationErrorCollector,
-  loadConfig,
-} from "../lib";
-import { MessageCodes, MessageTexts } from "../lib/constants";
-import { normalizeEmail } from "../lib/utils";
+  checkEmail,
+  checkJwtSecretKey,
+  checkUsername,
+  minutesToMilliseconds,
+} from "../lib/utils";
 
 /**
  * Configures Passport.js with JWT strategy.
@@ -62,48 +63,28 @@ const configureJwtStrategy = (passport: PassportStatic) => {
  * - Creates a new user in the database.
  * - Issues a JWT token and sets it in an HTTP-only cookie.
  */
-const register = async (req: Request, res: Response): Promise<void> => {
+const register = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   let { username = "", email = "", password = "", name = "" } = req.body;
   username = username.trim();
   email = email.trim().toLowerCase();
-  const normalizedEmail = normalizeEmail(email);
 
   const envConfig = loadConfig();
-
-  const errors = createValidationErrorCollector();
-  errors.add("username", username, MessageCodes.REQUIRED_FIELD);
-  errors.add("email", normalizedEmail, MessageCodes.REQUIRED_FIELD);
-  errors.add("password", password, MessageCodes.REQUIRED_FIELD);
-
-  // Validate required fields
-  if (errors.hasErrors()) {
-    res.status(400).json(
-      createErrorResponse({
-        code: MessageCodes.VALIDATION_ERROR,
-        message: MessageTexts[MessageCodes.VALIDATION_ERROR],
-        details: errors.get(),
-      })
-    );
-    return;
-  }
-
   const jwtSecretKey = envConfig.BACKEND_JWT_SECRET_KEY || "";
-  errors.add(
-    "securityKey",
-    jwtSecretKey && jwtSecretKey.trim().length >= 5,
-    MessageCodes.MISSING_SECURITY_KEY
-  );
 
-  if (errors.hasErrors()) {
-    res.status(400).json(
-      createErrorResponse({
-        code: MessageCodes.MISSING_SECURITY_KEY,
-        message: MessageTexts[MessageCodes.MISSING_SECURITY_KEY],
-        details: errors.get(),
-      })
-    );
-    return;
-  }
+  checkUsername(username);
+  checkEmail(email);
+  checkJwtSecretKey(jwtSecretKey);
+  createErrorIf({
+    fieldName: "Cookie Expiration in Minutes",
+    condition: envConfig.COOKIE_EXPIRATION_MINUTES,
+    ErrorType: ApiError,
+    details: "Cookie expiration time is not set",
+    code: ErrorCodes.MISSING_COOKIE_EXPIRATION,
+  });
 
   try {
     const { token } = await registerUser({
@@ -114,16 +95,16 @@ const register = async (req: Request, res: Response): Promise<void> => {
     });
 
     res
-      .cookie("token", token, {
+      .cookie(envConfig.COOKIE_NAME!, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 3600000,
+        maxAge: minutesToMilliseconds(envConfig.COOKIE_EXPIRATION_MINUTES!),
       })
       .status(201)
       .json({ message: "Authentication successful" });
   } catch (err: any) {
-    res.status(400).json({ message: err.message || "Registration failed" });
+    next(new BadRequestError(err.message || "Registration failed"));
   }
 };
 
@@ -133,34 +114,42 @@ const register = async (req: Request, res: Response): Promise<void> => {
  * - Delegates login logic to auth service.
  * - Sets JWT token in HTTP-only cookie on success.
  */
-const login = async (req: Request, res: Response): Promise<void> => {
+const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   let { username, password } = req.body;
   username = username.trim();
-  const errors = createValidationErrorCollector();
 
   // Validate inputs
-  errors.add("username", username, MessageCodes.REQUIRED_FIELD);
-  errors.add("password", password, MessageCodes.REQUIRED_FIELD);
 
   const envConfig = loadConfig();
-  const jwtSecretKey = envConfig.BACKEND_JWT_SECRET_KEY;
+  const jwtSecretKey = envConfig.BACKEND_JWT_SECRET_KEY || "";
 
-  errors.add(
-    "securityKey",
-    jwtSecretKey && jwtSecretKey.trim().length >= 5,
-    MessageCodes.MISSING_SECURITY_KEY
-  );
+  createErrorIf({
+    fieldName: "username",
+    condition: username,
+    ErrorType: BadRequestError,
+    details: "Username is required",
+    code: ErrorCodes.MISSING_USERNAME,
+  });
+  createErrorIf({
+    fieldName: "password",
+    condition: password,
+    ErrorType: BadRequestError,
+    details: "Password is required",
+    code: ErrorCodes.MISSING_PASSWORD,
+  });
 
-  if (errors.hasErrors()) {
-    res.status(400).json(
-      createErrorResponse({
-        code: MessageCodes.VALIDATION_ERROR,
-        message: MessageTexts[MessageCodes.VALIDATION_ERROR],
-        details: errors.get(),
-      })
-    );
-    return;
-  }
+  createErrorIf({
+    fieldName: "Cookie Expiration in Minutes",
+    condition: envConfig.COOKIE_EXPIRATION_MINUTES,
+    ErrorType: ApiError,
+    details: "Cookie expiration time is not set",
+    code: ErrorCodes.MISSING_COOKIE_EXPIRATION,
+  });
+  checkJwtSecretKey(jwtSecretKey);
 
   try {
     const { token } = await loginUser({
@@ -170,23 +159,16 @@ const login = async (req: Request, res: Response): Promise<void> => {
     });
 
     res
-      .cookie("token", token, {
+      .cookie(envConfig.COOKIE_NAME!, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 3600000,
+        maxAge: minutesToMilliseconds(envConfig.COOKIE_EXPIRATION_MINUTES!),
       })
       .status(200)
       .json({ message: "Authentication successful" });
-  } catch (error) {
-    res.status(401).json(
-      createErrorResponse({
-        code: MessageCodes.AUTH_FAILED,
-        message: MessageTexts[MessageCodes.AUTH_FAILED],
-        details: [],
-        showDetails: false,
-      })
-    );
+  } catch (err: any) {
+    next(new BadRequestError(err.message || "Login failed"));
   }
 };
 
@@ -195,7 +177,10 @@ const login = async (req: Request, res: Response): Promise<void> => {
  * - Clears the JWT cookie from the browser.
  */
 const logout = (req: Request, res: Response): void => {
-  res.clearCookie("token");
+  const config = loadConfig();
+  if (config.COOKIE_NAME) {
+    res.clearCookie(config.COOKIE_NAME);
+  }
   res.status(200).json({ message: "Logged out successfully." });
 };
 
@@ -205,10 +190,7 @@ const logout = (req: Request, res: Response): void => {
  */
 const me = async (req: Request, res: Response): Promise<void> => {
   const user = req.user;
-  if (!user) {
-    res.status(401).json({ message: "Not authenticated" });
-    return;
-  }
+  if (!user) throw new BadRequestError(ErrorCodes.UNAUTHORIZED);
 
   // Strip password before returning user object
   const { password, ...safeUser } = (user as any).toObject();
@@ -258,24 +240,27 @@ const refreshToken = async (req: Request, res: Response): Promise<void> => {
  * - Validates current and new passwords.
  * - Delegates logic to the service.
  */
-const changePassword = async (req: Request, res: Response): Promise<void> => {
+const changePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   const user = req.user as any;
   const { currentPassword, newPassword } = req.body;
-  const errors = createValidationErrorCollector();
-
-  errors.add("currentPassword", currentPassword, MessageCodes.REQUIRED_FIELD);
-  errors.add("newPassword", newPassword, MessageCodes.REQUIRED_FIELD);
-
-  if (errors.hasErrors()) {
-    res.status(400).json(
-      createErrorResponse({
-        code: MessageCodes.VALIDATION_ERROR,
-        message: MessageTexts[MessageCodes.VALIDATION_ERROR],
-        details: errors.get(),
-      })
-    );
-    return;
-  }
+  createErrorIf({
+    fieldName: "currentPassword",
+    condition: currentPassword,
+    ErrorType: BadRequestError,
+    details: "Current password is required",
+    code: ErrorCodes.MISSING_PASSWORD,
+  });
+  createErrorIf({
+    fieldName: "newPassword",
+    condition: newPassword,
+    ErrorType: BadRequestError,
+    details: "New password is required",
+    code: ErrorCodes.MISSING_PASSWORD,
+  });
 
   try {
     await changeUserPassword({
@@ -286,16 +271,7 @@ const changePassword = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json({ message: "Password changed successfully" });
   } catch (err: any) {
-    const message = err.message || "Server error";
-
-    const statusCode =
-      message === "User not found"
-        ? 404
-        : message === "Incorrect current password"
-        ? 403
-        : 500;
-
-    res.status(statusCode).json({ message });
+    next(new BadRequestError(err.message || "Failed to change password"));
   }
 };
 

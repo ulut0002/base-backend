@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 import { logger, loadConfig } from "./index";
 
-const config = loadConfig();
-
 /**
  * Initializes and connects to MongoDB.
  */
 async function connectToDatabase(): Promise<void> {
+  const config = loadConfig();
+
   if (!config.BACKEND_MONGODB_URI) {
     logger.error("MongoDB URI is not defined in environment variables.");
     return;

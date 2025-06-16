@@ -4,6 +4,7 @@ import { VerificationCodeStatus, VerificationCodeType } from "../types";
 export interface VerificationCodeDocument {
   userId: Types.ObjectId;
   code: string;
+  hash: string;
   type: VerificationCodeType;
   status: VerificationCodeStatus;
   expiresAt: Date;
@@ -17,6 +18,7 @@ const verificationCodeSchema = new Schema<VerificationCodeDocument>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     code: { type: String, required: true, index: true },
+    hash: { type: String, required: true, index: true, unique: true },
     type: {
       type: String,
       enum: ["PASSWORD_RESET", "EMAIL_VERIFICATION", "TWO_FACTOR", "INVITE"],

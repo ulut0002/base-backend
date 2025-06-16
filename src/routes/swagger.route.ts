@@ -38,6 +38,7 @@ import { getBackendUrl } from "../lib";
  *         description: Successful login
  */
 
+console.log("Setting up Swagger API documentation...", getBackendUrl());
 const swaggerSpec = swaggerJsdoc({
   definition: {
     openapi: "3.0.0",
@@ -49,6 +50,11 @@ const swaggerSpec = swaggerJsdoc({
     servers: [
       {
         url: getBackendUrl(), // Or dynamically from getBackendUrl()
+        description: "Production server",
+      },
+      {
+        url: "http://localhost:3000", // Fallback for local development
+        description: "Local development server",
       },
     ],
     components: {
@@ -66,6 +72,6 @@ const swaggerSpec = swaggerJsdoc({
 });
 
 const swaggerRoute = Router();
-swaggerRoute.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+swaggerRoute.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 export { swaggerRoute };

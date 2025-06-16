@@ -14,6 +14,10 @@ import {
   SessionData,
 } from "./auth.types";
 
+import { EnvConfig } from "./config.types";
+
+import { PasswordRequestResult } from "./recovery.types";
+
 export type { UserRegistrationDTO, NewUserInput, UserDocument, LinkedObject };
 export type {
   RegisterUserInput,
@@ -26,3 +30,7 @@ export type {
 export { UserRole };
 
 export type { NormalizeOptions };
+
+export type { PasswordRequestResult };
+
+export type { EnvConfig };

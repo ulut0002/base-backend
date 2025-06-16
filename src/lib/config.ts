@@ -1,3 +1,4 @@
+import { EnvConfig } from "../types";
 import { isTrue } from "./utils";
 
 let _cachedConfig: EnvConfig | null = null;
@@ -15,6 +16,10 @@ function loadConfig(): EnvConfig {
     BACKEND_JWT_SECRET_KEY: process.env.BACKEND_JWT_SECRET_KEY || "",
     PASSWORD_RESET_WINDOW_MINUTES: parseInt(
       String(process.env.PASSWORD_RESET_WINDOW_MINUTES)
+    ),
+    COOKIE_NAME: process.env.COOKIE_NAME || "token",
+    COOKIE_EXPIRATION_MINUTES: parseInt(
+      `${process.env.COOKIE_EXPIRATION_MINUTES}` || "60"
     ),
     PASSWORD_RESET_RATE_LIMIT: parseInt(
       String(process.env.PASSWORD_RESET_RATE_LIMIT)
@@ -39,8 +44,6 @@ function loadConfig(): EnvConfig {
  */
 function getBackendUrl(): string | undefined {
   const config = loadConfig();
-
-  console.log("Loaded config:", config);
 
   const backendUrl = config.BACKEND_URL;
   const backendPort = config.BACKEND_PORT;

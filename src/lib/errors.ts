@@ -1,4 +1,8 @@
-import { MessageCodes } from "./constants";
+import { ErrorCodes, MessageCodes } from "./constants";
+import createDebug from "debug";
+import { Request, Response, NextFunction } from "express";
+
+const debug = createDebug("app:errorHandler");
 
 /**
  * Represents a detailed error for a specific field (optional).
@@ -39,7 +43,14 @@ const createErrorResponse = ({
     error.details = details;
   }
 
-  return { status: "error", error };
+  return {
+    status: "error",
+    error: {
+      code, // machine-readable
+      message, // user-friendly
+      ...(showDetails && details.length > 0 ? { details } : {}),
+    },
+  };
 };
 
 /**
@@ -93,4 +104,109 @@ const createValidationErrorCollector = () => {
   return { add, hasErrors, get };
 };
 
-export { createValidationErrorCollector, createErrorResponse };
+class ApiError extends Error {
+  status: number;
+  name: string;
+  code: string;
+  fieldErrors: FieldError[] = [];
+
+  constructor(message: string, status = 500) {
+    super(message);
+    this.status = status;
+    this.name = "ApiError";
+    this.code = MessageCodes.API_ERROR; // Default code
+    this.fieldErrors = [];
+    Object.setPrototypeOf(this, new.target.prototype); // Restore prototype chain
+  }
+}
+
+class NotFoundError extends ApiError {
+  constructor(message = "Not Found", code = ErrorCodes.NOT_FOUND) {
+    super(message, 404);
+    this.name = "NotFoundError";
+    this.code = code || ErrorCodes.NOT_FOUND;
+  }
+}
+
+class BadRequestError extends ApiError {
+  constructor(message = "Bad Request", code = ErrorCodes.BAD_REQUEST) {
+    super(message, 400);
+    this.name = "BadRequestError";
+    this.code = code || ErrorCodes.BAD_REQUEST;
+  }
+}
+
+class UnauthorizedError extends ApiError {
+  constructor(message = "Unauthorized", code = ErrorCodes.UNAUTHORIZED) {
+    super(message, 401);
+    this.name = "UnauthorizedError";
+    this.code = code || ErrorCodes.UNAUTHORIZED;
+  }
+}
+
+class ForbiddenError extends ApiError {
+  constructor(message = "Forbidden", code = ErrorCodes.FORBIDDEN) {
+    super(message, 403);
+    this.name = "ForbiddenError";
+    this.code = code || ErrorCodes.FORBIDDEN;
+  }
+}
+
+const errorHandler = (
+  error: any,
+  req: Request,
+  res: Response,
+  _next: NextFunction
+): void => {
+  debug(error);
+
+  if (error instanceof ApiError) {
+    res.status(error.status).json({
+      name: error.name || "API_ERROR",
+      code: error.code || MessageCodes.API_ERROR,
+      error: error.message,
+      fieldErrors: error.fieldErrors.length > 0 ? error.fieldErrors : [],
+    });
+    return;
+  }
+
+  res.status(500).json({
+    error: "Something went wrong",
+  });
+};
+
+const createErrorIf = <T extends ApiError>({
+  fieldName,
+  condition,
+  details,
+  code,
+  ErrorType = BadRequestError as unknown as new (
+    message: string,
+    code?: any
+  ) => T,
+}: {
+  fieldName: string;
+  condition: any;
+  details?: string;
+  code?: string | ErrorCodes; // allow both if needed
+  ErrorType?: new (message: string, code?: any) => T;
+}): void => {
+  if (!condition) {
+    const baseMessage = `Invalid value for field: ${fieldName}.`;
+    const fullMessage = `${baseMessage} ${details || ""}`.trim();
+    const error = new ErrorType(fullMessage, code);
+    throw error;
+  }
+};
+
+export {
+  createValidationErrorCollector,
+  createErrorResponse,
+  errorHandler,
+  ApiError,
+  NotFoundError,
+  BadRequestError,
+  UnauthorizedError,
+  ForbiddenError,
+  createErrorIf,
+};

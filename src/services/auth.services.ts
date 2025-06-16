@@ -1,5 +1,6 @@
-import { normalizeEmail } from "../lib/utils";
-import { UserModel } from "../modals";
+import { BadRequestError, loadConfig } from "../lib";
+import { ErrorCodes } from "../lib/constants";
+import { minutesToSeconds, normalizeEmail } from "../lib/utils";
 import {
   LoginUserInput,
   RegisterUserInput,
@@ -15,78 +16,122 @@ import {
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+/**
+ * Registers a new user in the system.
+ * - Normalizes email
+ * - Checks for existing users by username and email (case-insensitive)
+ * - Hashes the password
+ * - Creates the user in the database
+ * - Returns a signed JWT for session authentication
+ */
 const registerUser = async ({
   username,
   email,
   password,
   jwtSecretKey,
 }: RegisterUserInput): Promise<{ token: string }> => {
+  const envConfig = loadConfig();
   const normalizedEmail = normalizeEmail(email);
 
+  // Check if a user already exists with the same username or email
   let existingUser = await findExistingUserByUsernameOrEmail({
-    username: username,
-    email: email,
+    username,
+    email,
   });
-  if (existingUser) throw new Error("User already exists");
+  if (existingUser)
+    throw new BadRequestError(
+      "User already exists",
+      ErrorCodes.EXISTING_USER_FOUND
+    );
 
-  existingUser = await findExistingUserByUsernameOrEmail({
-    email: normalizedEmail,
-  });
-  if (existingUser) throw new Error("User already exists");
+  // Retry with normalized email if not found
+  if (!existingUser) {
+    existingUser = await findExistingUserByUsernameOrEmail({
+      email: normalizedEmail,
+    });
+    if (existingUser)
+      throw new BadRequestError(
+        "User already exists",
+        ErrorCodes.EXISTING_USER_FOUND
+      );
+  }
 
+  // Hash the password before saving
   const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Create the user
   const newUser = await createLocalUser({
     username,
-    email: email,
+    email,
     normalizedEmail: normalizedEmail!,
     password: hashedPassword,
   });
 
+  // Sign a JWT token with session payload
   const token = jwt.sign(createSessionObject(newUser), jwtSecretKey, {
-    expiresIn: "1h",
-  });
-
-  return { token };
-};
-
-const loginUser = async ({
-  usernameOrEmail,
-  password,
-  jwtSecretKey,
-}: LoginUserInput): Promise<{ token: string }> => {
-  let user = await findExistingUserByUsernameOrEmail({
-    usernameOrEmail,
-  });
-  if (!user) {
-    const normalizedEmail = normalizeEmail(usernameOrEmail);
-
-    if (normalizedEmail) {
-      user = await findExistingUserByUsernameOrEmail({
-        normalizedEmail: normalizedEmail,
-      });
-    }
-  }
-
-  if (!user || !user.password) {
-    throw new Error("Invalid credentials");
-  }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    throw new Error("Invalid credentials");
-  }
-
-  const token = jwt.sign(createSessionObject(user), jwtSecretKey, {
-    expiresIn: "1h",
+    expiresIn: minutesToSeconds(envConfig.COOKIE_EXPIRATION_MINUTES!),
   });
 
   return { token };
 };
 
 /**
- * Changes the password for a user.
- * - Verifies the current password.
- * - Hashes and saves the new password.
+ * Authenticates a user by email or username.
+ * - Attempts to find a matching user (including normalized email)
+ * - Validates the password
+ * - Returns a signed JWT if successful
+ */
+const loginUser = async ({
+  usernameOrEmail,
+  password,
+  jwtSecretKey,
+}: LoginUserInput): Promise<{ token: string }> => {
+  const envConfig = loadConfig();
+
+  // Try to find the user using raw input
+  let user = await findExistingUserByUsernameOrEmail({ usernameOrEmail });
+
+  // Fallback: try normalized email
+  if (!user) {
+    const normalizedEmail = normalizeEmail(usernameOrEmail);
+    if (normalizedEmail) {
+      user = await findExistingUserByUsernameOrEmail({ normalizedEmail });
+    }
+  }
+
+  // If no user or password is found, reject
+  if (!user) {
+    throw new BadRequestError("User not found", ErrorCodes.USER_NOT_FOUND);
+  }
+
+  if (!user.password) {
+    throw new BadRequestError(
+      "Password not found",
+      ErrorCodes.USER_MISSING_PASSWORD
+    );
+  }
+
+  // Compare provided password with the hashed one
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    throw new BadRequestError(
+      "Invalid credentials",
+      ErrorCodes.PASSWORD_NOT_MATCHING
+    );
+  }
+
+  // Sign and return JWT
+  const token = jwt.sign(createSessionObject(user), jwtSecretKey, {
+    expiresIn: minutesToSeconds(envConfig.COOKIE_EXPIRATION_MINUTES!),
+  });
+
+  return { token };
+};
+
+/**
+ * Changes a user's password securely.
+ * - Verifies current password
+ * - Hashes and stores the new password
  */
 const changeUserPassword = async ({
   userId,
@@ -99,24 +144,33 @@ const changeUserPassword = async ({
 }): Promise<void> => {
   const existingUser = await findUserById(userId);
   if (!existingUser || !existingUser.password) {
-    throw new Error("User not found");
+    throw new BadRequestError("User not found", ErrorCodes.USER_NOT_FOUND);
   }
 
+  // Validate current password
   const isMatch = await bcrypt.compare(currentPassword, existingUser.password);
   if (!isMatch) {
-    throw new Error("Incorrect current password");
+    throw new BadRequestError(
+      "Incorrect current password",
+      ErrorCodes.INVALID_CREDENTIALS
+    );
   }
 
+  // Hash and save the new password
   const hashedNew = await bcrypt.hash(newPassword, 10);
   existingUser.password = hashedNew;
   await existingUser.save();
 };
 
+/**
+ * Creates the payload object for JWT sessions.
+ * Used when signing tokens for authentication.
+ */
 export const createSessionObject = (user: UserDocument): SessionData => {
   return {
     sub: user._id.toString(),
     username: user.username || "",
-    role: user.userRole || UserRole.USER, // Fallback role
+    role: user.userRole || UserRole.USER, // Fallback to USER role
   };
 };
 

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import crypto from "crypto";
 import {
   resendVerificationEmail,
   resetUserPassword,
@@ -7,6 +8,10 @@ import {
   verifyUserAccount,
 } from "../services";
 import { requestPasswordReset } from "../services/recovery.services";
+import { VerificationCodeModel } from "../modals/VerificationCode";
+import { BadRequestError, createErrorIf, NotFoundError } from "../lib";
+import { ErrorCodes } from "../lib/constants";
+import { create } from "domain";
 
 export const postForgotPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
@@ -15,9 +20,91 @@ export const postForgotPassword = async (req: Request, res: Response) => {
 };
 
 export const postResetPassword = async (req: Request, res: Response) => {
-  const { token, newPassword } = req.body;
-  await resetUserPassword(token, newPassword);
-  res.status(200).json({ message: "Password has been reset" });
+  const { token, hash, newPassword, newPasswordConfirm } = req.body;
+
+  const now: Date = new Date();
+
+  createErrorIf({
+    fieldName: "token",
+    condition: token,
+    ErrorType: BadRequestError,
+    details: "Token is required",
+    code: ErrorCodes.MISSING_TOKEN,
+  });
+
+  createErrorIf({
+    fieldName: "hash",
+    condition: hash,
+    ErrorType: BadRequestError,
+    details: "Hash is required",
+    code: ErrorCodes.MISSING_HASH,
+  });
+
+  createErrorIf({
+    fieldName: "newPassword",
+    condition: newPassword,
+    ErrorType: BadRequestError,
+    details: "New password is required",
+    code: ErrorCodes.MISSING_PASSWORD,
+  });
+
+  createErrorIf({
+    fieldName: "newPasswordConfirm",
+    condition: newPasswordConfirm,
+    ErrorType: BadRequestError,
+    details: "New password confirmation is required",
+    code: ErrorCodes.MISSING_PASSWORD_CONFIRMATION,
+  });
+
+  console.log(
+    newPassword,
+    newPasswordConfirm,
+    newPassword === newPasswordConfirm
+  );
+
+  createErrorIf({
+    fieldName: "Password confirmation",
+    condition: newPasswordConfirm === newPassword,
+    ErrorType: BadRequestError,
+    details: "Passwords do not match",
+    code: ErrorCodes.PASSWORD_NOT_MATCHING,
+  });
+
+  // const hashedHash = crypto.createHash("sha256").update(hash).digest("hex");
+
+  const verification = await VerificationCodeModel.findOne({
+    type: "PASSWORD_RESET",
+    code: token,
+    hash: hash,
+    status: "PENDING",
+    // expiresAt: { $gt: now },
+  });
+
+  if (!verification) {
+    throw new NotFoundError(
+      "Invalid or expired token/hash",
+      ErrorCodes.VERIFICATION_CODE_NOT_FOUND
+    );
+  }
+
+  console.log(verification.expiresAt, now);
+  if (verification.expiresAt < now) {
+    throw new BadRequestError(
+      "Token has expired",
+      ErrorCodes.VERIFICATION_CODE_EXPIRED
+    );
+  }
+
+  // throw new BadRequestError("This feature is not implemented yet");
+
+  await resetUserPassword(verification.userId.toString(), newPassword);
+
+  // verification.status = "VERIFIED";
+  // verification.verifiedAt = new Date();
+  // await verification.save();
+
+  res.status(200).json({ message: "Password has been reset successfully." });
+  return;
 };
 
 export const postSendVerification = async (req: Request, res: Response) => {

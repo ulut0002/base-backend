@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@types/debug':
+        specifier: ^4.1.12
+        version: 4.1.12
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0
@@ -32,6 +35,9 @@ importers:
       csurf:
         specifier: ^1.11.0
         version: 1.11.0
+      debug:
+        specifier: ^4.4.1
+        version: 4.4.1
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0
@@ -627,6 +633,9 @@ packages:
 
   '@types/csurf@1.11.5':
     resolution: {integrity: sha512-5rw87+5YGixyL2W8wblSUl5DSZi5YOlXE6Awwn2ofLvqKr/1LruKffrQipeJKUX44VaxKj8m5es3vfhltJTOoA==}
+
+  '@types/debug@4.1.12':
+    resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
 
   '@types/express-rate-limit@6.0.2':
     resolution: {integrity: sha512-e1xZLOOlxCDvplAGq7rDcXtbdBu2CWRsMjaIu1LVqGxWtKvwr884YE5mPs3IvHeG/OMDhf24oTaqG5T1bV3rBQ==}
@@ -3209,6 +3218,10 @@ snapshots:
   '@types/csurf@1.11.5':
     dependencies:
       '@types/express-serve-static-core': 5.0.6
+
+  '@types/debug@4.1.12':
+    dependencies:
+      '@types/ms': 2.1.0
 
   '@types/express-rate-limit@6.0.2(express@5.1.0)':
     dependencies:

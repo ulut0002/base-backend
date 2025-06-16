@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 
 import "./jobs/scheduler";
@@ -18,6 +18,7 @@ import {
   configureApp,
   connectToDatabase,
   disconnectFromDatabase,
+  errorHandler,
   getBackendUrl,
   loadConfig,
   logger,
@@ -82,10 +83,7 @@ app.use((req: Request, res: Response) => {
 // Global Error Handler
 // -------------------------
 
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  logger.error(err);
-  res.status(500).json({ error: "Internal server error" });
-});
+app.use(errorHandler);
 
 // -------------------------
 // Start HTTP + Socket.IO Server
