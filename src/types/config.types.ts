@@ -13,6 +13,7 @@ type EnvConfig = Partial<{
   PASSWORD_RESET_WINDOW_MINUTES: number;
   PASSWORD_RESET_RATE_LIMIT: number; // Rate limit for password reset requests
   PASSWORD_RESET_EXPIRATION_MINUTES: number; // Expiration time for password reset codes
+  EMAIL_VERIFICATION_EXPIRATION_MINUTES: number; // Expiration time for email verification codes
 
   NODEMAILER_HOST: string; // SMTP host for sending emails
   NODEMAILER_PORT: number; // SMTP port for sending emails

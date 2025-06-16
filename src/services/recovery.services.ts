@@ -9,10 +9,16 @@ import {
 } from "../lib/utils";
 import { UserModel } from "../modals";
 import { VerificationCodeModel } from "../modals/VerificationCode";
-import { PasswordRequestResult } from "../types";
 import { findExistingUserByUsernameOrEmail } from "./user.services";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
+import {
+  CreateVerificationRequest,
+  CreateVerificationResult,
+  ResetPasswordRequest,
+  ResetPasswordResult,
+  UserDocument,
+} from "../types";
 
 const sendForgotPasswordEmail = async (email: string) => {
   // Placeholder logic for sending password reset email
@@ -39,27 +45,114 @@ const resetUserPassword = async (
   await user.save();
 };
 
-const sendVerificationEmail = async (userId: string) => {
+const sendVerificationEmail = async ({ email }: CreateVerificationRequest) => {
   // Placeholder logic for sending email verification link
+};
+
+// This either creates a new verification code or returns an existing one
+const createVerificationToken = async ({
+  email,
+  sendEmail = false,
+}: CreateVerificationRequest): Promise<CreateVerificationResult | null> => {
+  if (!email) {
+    throw new BadRequestError("Email is required", ErrorCodes.MISSING_EMAIL);
+  }
+  const emailNormalized = normalizeEmail(email);
+
+  let user = await findExistingUserByUsernameOrEmail({
+    usernameOrEmail: email,
+  });
+  if (!user) {
+    user = await findExistingUserByUsernameOrEmail({
+      normalizedEmail: emailNormalized,
+    });
+  }
+
+  if (!user) {
+    throw new NotFoundError("User not found", ErrorCodes.USER_NOT_FOUND);
+  }
+
+  if (user.isVerified) {
+    throw new BadRequestError(
+      "User account is already verified",
+      ErrorCodes.USER_ALREADY_VERIFIED
+    );
+  }
+
+  if (!user.password) {
+    throw new BadRequestError(
+      "User does not need to verify their account",
+      ErrorCodes.USER_ALREADY_VERIFIED
+    );
+  }
+
+  // if there is an existing verification code, return it
+  let existingCode = await VerificationCodeModel.findOne({
+    userId: user._id,
+    type: "EMAIL_VERIFICATION",
+    status: "PENDING",
+    expiresAt: { $gt: new Date() },
+  });
+
+  if (!existingCode) {
+    const config = loadConfig();
+    const VERIFICATION_EXPIRATION_MINUTES =
+      config.EMAIL_VERIFICATION_EXPIRATION_MINUTES || 10;
+
+    const code = generateVerificationCode(); // e.g., "58493"
+    const linkToken = crypto.randomBytes(32).toString("hex");
+    const hash = crypto.createHash("sha256").update(linkToken).digest("hex");
+    existingCode = await VerificationCodeModel.create({
+      userId: user._id,
+      code, // 5-digit code
+      hash, // sha256(linkToken)
+      type: "EMAIL_VERIFICATION",
+      expiresAt: new Date(
+        Date.now() + 1000 * 60 * VERIFICATION_EXPIRATION_MINUTES
+      ),
+      metadata: {
+        // optional: ip address, userAgent, etc.
+      },
+    });
+  }
+
+  let returnValue: CreateVerificationResult | null = null;
+
+  if (existingCode) {
+    if (sendEmail && user.email) {
+      // await sendVerificationEmail({ email: user.email });
+    }
+    returnValue = {
+      verificationStatus: "NEEDS_VERIFICATION",
+      code: existingCode.code,
+      hash: existingCode.hash,
+      userId: user._id.toString(),
+      expiresAt: existingCode.expiresAt,
+      expireInSeconds: (existingCode.expiresAt.getTime() - Date.now()) / 1000,
+    };
+  }
+
+  deleteExpiredVerificationCodes();
+
+  return returnValue;
 };
 
 const verifyUserAccount = async (token: string) => {
   // Placeholder logic for verifying account using a token
 };
 
-const resendVerificationEmail = async (email: string) => {
-  // Placeholder logic for resending verification link
-};
+const resendVerificationEmail = async (user: UserDocument) => {};
 
-const requestPasswordReset = async (
-  usernameOrEmail: string
-): Promise<PasswordRequestResult | null> => {
+const requestPasswordReset = async ({
+  emailOrUsername,
+  sendEmail = false,
+}: ResetPasswordRequest): Promise<ResetPasswordResult | null> => {
   const config = loadConfig();
-  const normalizedEmail = normalizeEmail(usernameOrEmail);
+  const normalizedEmail = normalizeEmail(emailOrUsername);
 
   const user = await findExistingUserByUsernameOrEmail({
-    username: usernameOrEmail,
-    email: usernameOrEmail,
+    username: emailOrUsername,
+    email: emailOrUsername,
     normalizedEmail,
   });
 
@@ -67,7 +160,7 @@ const requestPasswordReset = async (
     throw new Error("User not found");
   }
 
-  if (!user.email) {
+  if (!user.email && sendEmail) {
     throw new Error(
       "User does not have an email associated with their account"
     );
@@ -117,11 +210,13 @@ const requestPasswordReset = async (
   }
 
   // ✅ Send both `code` (for manual entry) and `linkToken` (for URL link)
-  await sendPasswordResetEmail(user.email, code, linkToken);
+  if (sendEmail && user.email) {
+    await sendPasswordResetEmail(user.email, code, linkToken);
+  }
 
-  const result: PasswordRequestResult = {
-    token: linkToken,
-    hash,
+  const result: ResetPasswordResult = {
+    hash: verificationCode.hash,
+    code: verificationCode.code,
     userId: user._id.toString(),
     expiresAt: verificationCode.expiresAt,
     expireInSeconds: (verificationCode.expiresAt.getTime() - Date.now()) / 1000,
@@ -134,11 +229,10 @@ const requestPasswordReset = async (
 
 const deleteExpiredVerificationCodes = async () => {
   await VerificationCodeModel.deleteMany({
-    type: "PASSWORD_RESET",
-    status: "PENDING",
     expiresAt: { $lt: new Date() },
   });
 };
+
 export {
   sendForgotPasswordEmail,
   resetUserPassword,

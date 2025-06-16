@@ -11,7 +11,6 @@ import { requestPasswordReset } from "../services/recovery.services";
 import { VerificationCodeModel } from "../modals/VerificationCode";
 import { BadRequestError, createErrorIf, NotFoundError } from "../lib";
 import { ErrorCodes } from "../lib/constants";
-import { create } from "domain";
 
 export const postForgotPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
@@ -87,7 +86,6 @@ export const postResetPassword = async (req: Request, res: Response) => {
     );
   }
 
-  console.log(verification.expiresAt, now);
   if (verification.expiresAt < now) {
     throw new BadRequestError(
       "Token has expired",
@@ -99,17 +97,17 @@ export const postResetPassword = async (req: Request, res: Response) => {
 
   await resetUserPassword(verification.userId.toString(), newPassword);
 
-  // verification.status = "VERIFIED";
-  // verification.verifiedAt = new Date();
-  // await verification.save();
+  verification.status = "VERIFIED";
+  verification.verifiedAt = new Date();
+  await verification.save();
 
   res.status(200).json({ message: "Password has been reset successfully." });
   return;
 };
 
 export const postSendVerification = async (req: Request, res: Response) => {
-  const userId = (req.user as any)._id;
-  await sendVerificationEmail(userId);
+  const email = (req.user as any).email;
+  // await sendVerificationEmail({ email });
   res.status(200).json({ message: "Verification email sent" });
 };
 
@@ -131,12 +129,20 @@ export const verifyCode = async (req: Request, res: Response) => {
   res.status(200).json({ message: "Verification email resent" });
 };
 
+// requestPasswordReset
 export const postRequestPasswordReset = async (req: Request, res: Response) => {
-  const { emailOrUsername } = req.body;
+  const { emailOrUsername, sendEmail = false } = req.body;
 
-  requestPasswordReset(emailOrUsername)
-    .then(() => {
-      res.status(200).json({ message: "Password reset requested" });
+  requestPasswordReset({ emailOrUsername, sendEmail })
+    .then((result) => {
+      res.status(200).json({
+        message: "Password reset requested",
+        code: result?.code,
+        hash: result?.hash,
+        userId: result?.userId,
+        expiresAt: result?.expiresAt,
+        expireInSeconds: result?.expireInSeconds,
+      });
     })
     .catch((err: any) => {
       res.status(400).json({

@@ -38,6 +38,9 @@ const userSchema = new Schema<UserDocument>(
     profilePicture: { type: String },
     linkedObjects: { type: [linkedObjectSchema], default: [] },
     lastLogin: { type: Date },
+
+    isVerified: { type: Boolean, default: false },
+    verifiedAt: { type: Date },
     userRole: {
       type: String,
       enum: Object.values(UserRole), // Define your roles here

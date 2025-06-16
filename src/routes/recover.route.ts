@@ -3,7 +3,6 @@
 import express, { Router } from "express";
 import passport from "passport";
 import {
-  postForgotPassword,
   postResendVerification,
   postResetPassword,
   postSendVerification,
@@ -71,11 +70,7 @@ recoveryRouter.post("/reset-password", postResetPassword);
  *       200:
  *         description: Verification email sent
  */
-recoveryRouter.post(
-  "/send-verification",
-  passport.authenticate("jwt", { session: false }),
-  postSendVerification
-);
+recoveryRouter.post("/send-verification", postSendVerification);
 
 /**
  * @openapi

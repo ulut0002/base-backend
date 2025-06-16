@@ -27,6 +27,9 @@ function loadConfig(): EnvConfig {
     PASSWORD_RESET_EXPIRATION_MINUTES: parseInt(
       String(process.env.PASSWORD_RESET_EXPIRATION_MINUTES)
     ),
+    EMAIL_VERIFICATION_EXPIRATION_MINUTES: parseInt(
+      String(process.env.EMAIL_VERIFICATION_EXPIRATION_MINUTES)
+    ),
     NODEMAILER_HOST: process.env.NODEMAILER_HOST,
     NODEMAILER_PORT: parseInt(String(process.env.NODEMAILER_PORT)),
     NODEMAILER_USER: process.env.NODEMAILER_USER, // SMTP user for authentication

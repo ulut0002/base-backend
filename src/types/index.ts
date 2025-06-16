@@ -16,7 +16,13 @@ import {
 
 import { EnvConfig } from "./config.types";
 
-import { PasswordRequestResult } from "./recovery.types";
+import {
+  ResetPasswordRequest,
+  ResetPasswordResult,
+  CreateVerificationRequest,
+  CreateVerificationResult,
+  VerificationStatus,
+} from "./recovery.types";
 
 export type { UserRegistrationDTO, NewUserInput, UserDocument, LinkedObject };
 export type {
@@ -31,6 +37,12 @@ export { UserRole };
 
 export type { NormalizeOptions };
 
-export type { PasswordRequestResult };
+export type {
+  ResetPasswordRequest,
+  ResetPasswordResult,
+  CreateVerificationRequest,
+  CreateVerificationResult,
+  VerificationStatus,
+};
 
 export type { EnvConfig };

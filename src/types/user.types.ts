@@ -44,6 +44,9 @@ interface UserDocument extends NewUserInput, Document {
   _id: Types.ObjectId;
   linkedObjects?: LinkedObject[];
 
+  isVerified: { type: Boolean; default: false };
+  verifiedAt: { type: Date };
+
   lastLogin?: Date;
   userRole: string; // e.g., "admin", "user", etc.
 }
