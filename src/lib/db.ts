@@ -16,14 +16,9 @@ async function connectToDatabase(): Promise<void> {
 
   try {
     await mongoose.connect(config.BACKEND_MONGODB_URI);
-    logger.info("MongoDB connected");
-  } catch (error) {
-    logger.error("MongoDB connection error:", error);
-  }
+  } catch (error) {}
 
-  mongoose.connection.on("error", (err: Error) => {
-    logger.error("MongoDB connection error:", err);
-  });
+  mongoose.connection.on("error", (err: Error) => {});
 }
 
 /**

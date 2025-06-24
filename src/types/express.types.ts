@@ -1,4 +1,5 @@
 import "express";
+import { RequestHandler } from "express";
 
 declare module "express" {
   interface Request {

@@ -32,16 +32,7 @@ import {
   statusPost1,
   statusPost2,
 } from "./auth.post.middleware";
-
-interface AuthMiddlewareMap {
-  login: RequestHandler[];
-  register: RequestHandler[];
-  me: RequestHandler[];
-  logout: RequestHandler[];
-  changePassword: RequestHandler[];
-  refreshToken: RequestHandler[];
-  status: RequestHandler[];
-}
+import { AuthMiddlewareMap } from "../types";
 
 // Pre-middlewares (before controller logic)
 export const preAuthMiddleware: AuthMiddlewareMap = {
