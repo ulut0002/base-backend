@@ -2,6 +2,7 @@ import { getApiInfo } from "./root.controller";
 import {
   configureJwtStrategy,
   login,
+  loginSuccess,
   logout,
   me,
   register,
@@ -40,6 +41,7 @@ export { getApiInfo };
 export {
   register,
   login,
+  loginSuccess,
   configureJwtStrategy,
   logout,
   me,

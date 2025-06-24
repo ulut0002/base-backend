@@ -158,18 +158,33 @@ const login = async (
       jwtSecretKey: jwtSecretKey!,
     });
 
-    res
-      .cookie(envConfig.COOKIE_NAME!, token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: minutesToMilliseconds(envConfig.COOKIE_EXPIRATION_MINUTES!),
-      })
-      .status(200)
-      .json({ message: "Authentication successful" });
+    req.authToken = token;
+    next();
   } catch (err: any) {
     next(new BadRequestError(err.message || "Login failed"));
   }
+};
+
+const loginSuccess = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const envConfig = loadConfig();
+
+  if (!req.authToken) {
+    return next(new ApiError("Missing token", 500));
+  }
+
+  res
+    .cookie(envConfig.COOKIE_NAME!, req.authToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: minutesToMilliseconds(envConfig.COOKIE_EXPIRATION_MINUTES!),
+    })
+    .status(200)
+    .json({ message: "Authentication successful" });
 };
 
 /**
@@ -287,6 +302,7 @@ const checkAuthStatus = async (req: Request, res: Response): Promise<void> => {
 export {
   register,
   login,
+  loginSuccess,
   configureJwtStrategy,
   logout,
   me,

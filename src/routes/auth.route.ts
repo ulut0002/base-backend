@@ -10,7 +10,9 @@ import {
   changePassword,
   checkAuthStatus,
   refreshToken,
+  loginSuccess,
 } from "../controllers";
+import { postAuthMiddleware, preAuthMiddleware } from "../middleware";
 
 const authRouter: Router = express.Router();
 
@@ -36,7 +38,13 @@ const authRouter: Router = express.Router();
  *       200:
  *         description: JWT issued as HttpOnly cookie
  */
-authRouter.post("/login", login);
+authRouter.post(
+  "/login",
+  ...preAuthMiddleware.login,
+  login,
+  ...postAuthMiddleware.login,
+  loginSuccess
+);
 
 /**
  * @openapi
@@ -62,7 +70,12 @@ authRouter.post("/login", login);
  *       201:
  *         description: User created and JWT issued
  */
-authRouter.post("/register", register);
+authRouter.post(
+  "/register",
+  ...preAuthMiddleware.register,
+  register,
+  ...postAuthMiddleware.register
+);
 
 /**
  * @openapi
@@ -76,7 +89,13 @@ authRouter.post("/register", register);
  *       200:
  *         description: User profile data
  */
-authRouter.get("/me", passport.authenticate("jwt", { session: false }), me);
+authRouter.get(
+  "/me",
+  passport.authenticate("jwt", { session: false }),
+  ...preAuthMiddleware.me,
+  me,
+  ...postAuthMiddleware.me
+);
 
 /**
  * @openapi
@@ -88,7 +107,12 @@ authRouter.get("/me", passport.authenticate("jwt", { session: false }), me);
  *       200:
  *         description: JWT cookie cleared
  */
-authRouter.post("/logout", logout);
+authRouter.post(
+  "/logout",
+  ...preAuthMiddleware.logout,
+  logout,
+  ...postAuthMiddleware.logout
+);
 
 /**
  * @openapi
@@ -117,7 +141,9 @@ authRouter.post("/logout", logout);
 authRouter.post(
   "/change-password",
   passport.authenticate("jwt", { session: false }),
-  changePassword
+  ...preAuthMiddleware.changePassword,
+  changePassword,
+  ...postAuthMiddleware.changePassword
 );
 
 /**
@@ -130,7 +156,12 @@ authRouter.post(
  *       200:
  *         description: New JWT issued
  */
-authRouter.post("/refresh-token", refreshToken);
+authRouter.post(
+  "/refresh-token",
+  ...preAuthMiddleware.refreshToken,
+  refreshToken,
+  ...postAuthMiddleware.refreshToken
+);
 
 /**
  * @openapi
@@ -147,7 +178,9 @@ authRouter.post("/refresh-token", refreshToken);
 authRouter.get(
   "/status",
   passport.authenticate("jwt", { session: false }),
-  checkAuthStatus
+  ...preAuthMiddleware.status,
+  checkAuthStatus,
+  ...postAuthMiddleware.status
 );
 
 export { authRouter };
