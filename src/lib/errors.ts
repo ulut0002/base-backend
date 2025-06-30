@@ -1,4 +1,4 @@
-import { ErrorCodes, MessageCodes } from "./constants";
+import { ErrorCodes, HTTP_STATUS, MessageCodes } from "./constants";
 import createDebug from "debug";
 import { Request, Response, NextFunction } from "express";
 
@@ -110,7 +110,7 @@ class ApiError extends Error {
   code: string;
   fieldErrors: FieldError[] = [];
 
-  constructor(message: string, status = 500) {
+  constructor(message: string, status = HTTP_STATUS.INTERNAL_SERVER_ERROR) {
     super(message);
     this.status = status;
     this.name = "ApiError";
@@ -122,7 +122,7 @@ class ApiError extends Error {
 
 class NotFoundError extends ApiError {
   constructor(message = "Not Found", code = ErrorCodes.NOT_FOUND) {
-    super(message, 404);
+    super(message, HTTP_STATUS.NOT_FOUND);
     this.name = "NotFoundError";
     this.code = code || ErrorCodes.NOT_FOUND;
   }
@@ -130,7 +130,7 @@ class NotFoundError extends ApiError {
 
 class BadRequestError extends ApiError {
   constructor(message = "Bad Request", code = ErrorCodes.BAD_REQUEST) {
-    super(message, 400);
+    super(message, HTTP_STATUS.BAD_REQUEST);
     this.name = "BadRequestError";
     this.code = code || ErrorCodes.BAD_REQUEST;
   }
@@ -138,7 +138,7 @@ class BadRequestError extends ApiError {
 
 class UnauthorizedError extends ApiError {
   constructor(message = "Unauthorized", code = ErrorCodes.UNAUTHORIZED) {
-    super(message, 401);
+    super(message, HTTP_STATUS.UNAUTHORIZED);
     this.name = "UnauthorizedError";
     this.code = code || ErrorCodes.UNAUTHORIZED;
   }
@@ -146,7 +146,7 @@ class UnauthorizedError extends ApiError {
 
 class ForbiddenError extends ApiError {
   constructor(message = "Forbidden", code = ErrorCodes.FORBIDDEN) {
-    super(message, 403);
+    super(message, HTTP_STATUS.FORBIDDEN);
     this.name = "ForbiddenError";
     this.code = code || ErrorCodes.FORBIDDEN;
   }
@@ -170,7 +170,7 @@ const errorHandler = (
     return;
   }
 
-  res.status(500).json({
+  res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
     error: "Something went wrong",
   });
 };

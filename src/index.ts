@@ -85,7 +85,7 @@ function initializeApp(): void {
       });
 
       process.on("SIGINT", async () => {
-        logger.info("🔌 Shutting down gracefully...");
+        logger.info("Shutting down gracefully...");
         await disconnectFromDatabase();
         server.close(() => {
           logger.info("HTTP server closed");

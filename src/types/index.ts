@@ -24,7 +24,11 @@ import {
   VerificationStatus,
 } from "./recovery.types";
 
-import { AuthMiddlewareMap, MeMiddlewareMap } from "./middleware.types";
+import {
+  AuthMiddlewareMap,
+  MeMiddlewareMap,
+  SecurityMiddlewareMap,
+} from "./middleware.types";
 
 export type { UserRegistrationDTO, NewUserInput, UserDocument, LinkedObject };
 export type {
@@ -49,4 +53,4 @@ export type {
 
 export type { EnvConfig };
 
-export type { AuthMiddlewareMap, MeMiddlewareMap };
+export type { AuthMiddlewareMap, MeMiddlewareMap, SecurityMiddlewareMap };
