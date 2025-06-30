@@ -26,6 +26,7 @@ import {
 
 import { configureJwtStrategy } from "./controllers";
 import { createSocketServer } from "./lib/sockets";
+import { HTTP_STATUS } from "./lib/constants";
 
 // -------------------------
 // Load Environment Variables and App Config
@@ -34,7 +35,7 @@ import { createSocketServer } from "./lib/sockets";
 dotenv.config();
 const config = loadConfig();
 const backendUrl = getBackendUrl();
-const PORT = config.BACKEND_PORT || process.env.PORT || 3000;
+const PORT = config.backendPort!;
 
 // -------------------------
 // Application Entry Point
@@ -53,7 +54,7 @@ function initializeApp(): void {
     })
     .catch((err) => {
       logger.error("Failed to connect to MongoDB", err);
-      throw err; // re-throw to stop further steps
+      throw err;
     })
 
     .then(() => {
@@ -74,26 +75,26 @@ function initializeApp(): void {
       app.use("/docs", swaggerRoute);
 
       app.use((req: Request, res: Response) => {
-        res.status(404).json({ error: "Route not found" });
+        res.status(HTTP_STATUS.NOT_FOUND).json({ error: "Route not found" });
       });
 
       app.use(errorHandler);
 
       server.listen(PORT, () => {
-        logger.info(`🚀 Server running at ${backendUrl}`);
+        logger.info(`Server running at ${backendUrl}`);
       });
 
       process.on("SIGINT", async () => {
         logger.info("🔌 Shutting down gracefully...");
         await disconnectFromDatabase();
         server.close(() => {
-          logger.info("🛑 HTTP server closed");
+          logger.info("HTTP server closed");
           process.exit(0);
         });
       });
     })
     .catch((err) => {
-      logger.error("❌ Failed during app setup or server start", err);
+      logger.error("Failed during app setup or server start", err);
       process.exit(1);
     });
 }
@@ -111,6 +112,8 @@ function initializeApp(): void {
 async function initializeBusinessLogic() {
   logger.info("Running custom app initialization logic...");
   // Example: await seedDatabase(); or check system health
+
+  // Setting up emails
 }
 
 // -------------------------

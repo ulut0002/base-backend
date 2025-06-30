@@ -44,7 +44,18 @@ export const preMeMiddleware: MeMiddlewareMap = {
   username: [updateUsernamePre1, updateUsernamePre2],
   deactivate: [deactivateAccountPre1, deactivateAccountPre2],
   reactivate: [reactivateAccountPre1, reactivateAccountPre2],
-  singleUserId: [singleUserPre1, singleUserPre2],
-  delete: [deleteAccountPre1, deleteAccountPre2],
+  updateUserById: [singleUserPre1, singleUserPre2],
+  deleteUserById: [deleteAccountPre1, deleteAccountPre2],
   publicProfile: [publicProfilePre1, publicProfilePre2],
+};
+
+export const postMeMiddleware: MeMiddlewareMap = {
+  profile: [mePost1, mePost2],
+  email: [updateEmailPost1, updateEmailPost2],
+  username: [updateUsernamePost1, updateUsernamePost2],
+  deactivate: [deactivateAccountPost1, deactivateAccountPost2],
+  reactivate: [reactivateAccountPost1, reactivateAccountPost2],
+  updateUserById: [singleUserProfilePost1, singleUserProfilePost2],
+  deleteUserById: [deleteAccountPost1, deleteAccountPost2],
+  publicProfile: [publicProfilePost1, publicProfilePost2],
 };

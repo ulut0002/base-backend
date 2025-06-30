@@ -3,25 +3,25 @@
  * All values are read from `.env` files via dotenv and loaded into this shape.
  */
 type EnvConfig = Partial<{
-  BACKEND_URL: string; // Base URL for the backend server (e.g. http://localhost)
-  BACKEND_PORT: string; // Port number backend listens on (e.g. 3000)
-  BACKEND_MONGODB_URI: string; // MongoDB connection string
-  BACKEND_JWT_SECRET_KEY: string; // Secret key used for signing JWTs
-  COOKIE_NAME: string; // Name of the HTTP-only cookie used for JWTs
-  COOKIE_EXPIRATION_MINUTES: number; // Expiration time for the JWT cookie in minutes
+  backendUrl: string; // Base URL for the backend server (e.g. http://localhost)
+  backendPort: string; // Port number backend listens on (e.g. 3000)
+  backendMongoDbUri: string; // MongoDB connection string
+  backendJwtSecretKey: string; // Secret key used for signing JWTs
+  cookieName: string; // Name of the HTTP-only cookie used for JWTs
+  cookieExpirationMinutes: number; // Expiration time for the JWT cookie in minutes
 
-  PASSWORD_RESET_WINDOW_MINUTES: number;
-  PASSWORD_RESET_RATE_LIMIT: number; // Rate limit for password reset requests
-  PASSWORD_RESET_EXPIRATION_MINUTES: number; // Expiration time for password reset codes
-  EMAIL_VERIFICATION_EXPIRATION_MINUTES: number; // Expiration time for email verification codes
+  passwordResetWindowMinutes: number;
+  passwordResetRateLimit: number; // Rate limit for password reset requests
+  passwordResetExpirationMinutes: number; // Expiration time for password reset codes
+  emailVerificationExpirationMinutes: number; // Expiration time for email verification codes
 
-  NODEMAILER_HOST: string; // SMTP host for sending emails
-  NODEMAILER_PORT: number; // SMTP port for sending emails
-  NODEMAILER_USER: string; // SMTP user for authentication
-  NODEMAILER_PASS: string; // SMTP password for authentication
-  NODEMAILER_EMAIL_FROM: string; // Default "from" email address for sending emails
+  nodemailerHost: string; // SMTP host for sending emails
+  nodemailerPort: number; // SMTP port for sending emails
+  nodemailerUser: string; // SMTP user for authentication
+  nodemailerPass: string; // SMTP password for authentication
+  nodemailerEmailFrom: string; // Default "from" email address for sending emails
 
-  ENABLE_SOCKET_IO: boolean; // Whether to enable Socket.IO support
+  enableSocketIo: boolean; // Whether to enable Socket.IO support
 }>;
 
 export type { EnvConfig };

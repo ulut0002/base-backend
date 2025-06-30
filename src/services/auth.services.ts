@@ -69,7 +69,7 @@ const registerUser = async ({
 
   // Sign a JWT token with session payload
   const token = jwt.sign(createSessionObject(newUser), jwtSecretKey, {
-    expiresIn: minutesToSeconds(envConfig.COOKIE_EXPIRATION_MINUTES!),
+    expiresIn: minutesToSeconds(envConfig.cookieExpirationMinutes!),
   });
 
   return { token };
@@ -122,7 +122,7 @@ const loginUser = async ({
 
   // Sign and return JWT
   const token = jwt.sign(createSessionObject(user), jwtSecretKey, {
-    expiresIn: minutesToSeconds(envConfig.COOKIE_EXPIRATION_MINUTES!),
+    expiresIn: minutesToSeconds(envConfig.cookieExpirationMinutes!),
   });
 
   return { token };

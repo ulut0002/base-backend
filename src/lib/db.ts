@@ -7,7 +7,7 @@ import { logger, loadConfig } from "./index";
 async function connectToDatabase(): Promise<void> {
   const config = loadConfig();
 
-  if (!config.BACKEND_MONGODB_URI) {
+  if (!config.backendMongoDbUri) {
     logger.error("MongoDB URI is not defined in environment variables.");
     return;
   }
@@ -15,7 +15,7 @@ async function connectToDatabase(): Promise<void> {
   mongoose.Promise = Promise;
 
   try {
-    await mongoose.connect(config.BACKEND_MONGODB_URI);
+    await mongoose.connect(config.backendMongoDbUri);
   } catch (error) {}
 
   mongoose.connection.on("error", (err: Error) => {});

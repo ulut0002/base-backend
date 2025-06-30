@@ -6,4 +6,14 @@ type NormalizeOptions = {
   stripPlusAliases?: boolean;
   normalizeDomains?: boolean;
 };
-export type { NormalizeOptions };
+
+type MailProfile = {
+  name: string;
+  address: string;
+};
+
+type MailProfiles = {
+  [key: string]: MailProfile;
+};
+
+export type { NormalizeOptions, MailProfiles, MailProfile };

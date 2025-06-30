@@ -8,9 +8,7 @@ import { loadConfig } from "./config";
 // Defaults to a hardcoded fallback in dev, but should be set in .env for production.
 const envConfig = loadConfig();
 const jwtSecret =
-  envConfig.BACKEND_JWT_SECRET_KEY ||
-  process.env.JWT_SECRET ||
-  "your-secret-key";
+  envConfig.backendJwtSecretKey || process.env.JWT_SECRET || "your-secret-key";
 
 // Configuration options for the JWT strategy.
 // Instead of reading the token from Authorization header, we extract it from the 'token' cookie.

@@ -26,12 +26,7 @@ import {
  */
 const configureJwtStrategy = (passport: PassportStatic) => {
   const envConfig = loadConfig();
-  const secret = envConfig.BACKEND_JWT_SECRET_KEY;
-
-  if (!secret || secret.trim().length < 5) {
-    console.error("JWT secret key is missing or too short");
-    return;
-  }
+  const secret = envConfig.backendJwtSecretKey;
 
   const opts: StrategyOptions = {
     jwtFromRequest: (req: Request) => {
@@ -40,7 +35,7 @@ const configureJwtStrategy = (passport: PassportStatic) => {
       }
       return null;
     },
-    secretOrKey: secret,
+    secretOrKey: secret!,
   };
 
   // Attach the JWT strategy to passport
@@ -73,14 +68,14 @@ const register = async (
   email = email.trim().toLowerCase();
 
   const envConfig = loadConfig();
-  const jwtSecretKey = envConfig.BACKEND_JWT_SECRET_KEY || "";
+  const jwtSecretKey = envConfig.backendJwtSecretKey || "";
 
   checkUsername(username);
   checkEmail(email);
   checkJwtSecretKey(jwtSecretKey);
   createErrorIf({
     fieldName: "Cookie Expiration in Minutes",
-    condition: envConfig.COOKIE_EXPIRATION_MINUTES,
+    condition: envConfig.cookieExpirationMinutes,
     ErrorType: ApiError,
     details: "Cookie expiration time is not set",
     code: ErrorCodes.MISSING_COOKIE_EXPIRATION,
@@ -95,11 +90,11 @@ const register = async (
     });
 
     res
-      .cookie(envConfig.COOKIE_NAME!, token, {
+      .cookie(envConfig.cookieName!, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: minutesToMilliseconds(envConfig.COOKIE_EXPIRATION_MINUTES!),
+        maxAge: minutesToMilliseconds(envConfig.cookieExpirationMinutes!),
       })
       .status(201)
       .json({ message: "Authentication successful" });
@@ -125,7 +120,7 @@ const login = async (
   // Validate inputs
 
   const envConfig = loadConfig();
-  const jwtSecretKey = envConfig.BACKEND_JWT_SECRET_KEY || "";
+  const jwtSecretKey = envConfig.backendJwtSecretKey || "";
 
   createErrorIf({
     fieldName: "username",
@@ -144,7 +139,7 @@ const login = async (
 
   createErrorIf({
     fieldName: "Cookie Expiration in Minutes",
-    condition: envConfig.COOKIE_EXPIRATION_MINUTES,
+    condition: envConfig.cookieExpirationMinutes,
     ErrorType: ApiError,
     details: "Cookie expiration time is not set",
     code: ErrorCodes.MISSING_COOKIE_EXPIRATION,
@@ -177,11 +172,11 @@ const loginSuccess = async (
   }
 
   res
-    .cookie(envConfig.COOKIE_NAME!, req.authToken, {
+    .cookie(envConfig.cookieName!, req.authToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: minutesToMilliseconds(envConfig.COOKIE_EXPIRATION_MINUTES!),
+      maxAge: minutesToMilliseconds(envConfig.cookieExpirationMinutes!),
     })
     .status(200)
     .json({ message: "Authentication successful" });
@@ -193,8 +188,8 @@ const loginSuccess = async (
  */
 const logout = (req: Request, res: Response): void => {
   const config = loadConfig();
-  if (config.COOKIE_NAME) {
-    res.clearCookie(config.COOKIE_NAME);
+  if (config.cookieName) {
+    res.clearCookie(config.cookieName);
   }
   res.status(200).json({ message: "Logged out successfully." });
 };
@@ -220,7 +215,7 @@ const me = async (req: Request, res: Response): Promise<void> => {
 const refreshToken = async (req: Request, res: Response): Promise<void> => {
   const token = req.cookies?.refreshToken;
   const envConfig = loadConfig();
-  const jwtSecretKey = envConfig.BACKEND_JWT_SECRET_KEY;
+  const jwtSecretKey = envConfig.backendJwtSecretKey;
 
   if (!token || !jwtSecretKey) {
     res.status(401).json({ message: "Missing token" });

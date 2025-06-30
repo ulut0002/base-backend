@@ -10,7 +10,7 @@ export const createSocketServer = (app: Express) => {
   const server = http.createServer(app);
   let io: Server | undefined;
 
-  if (config.ENABLE_SOCKET_IO) {
+  if (config.enableSocketIo) {
     io = new Server(server, {
       cors: {
         origin: backendUrl,

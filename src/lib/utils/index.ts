@@ -1,5 +1,12 @@
 import { assertConfigVarsExist } from "./environment.utils";
-import { isTrue, minutesToMilliseconds, minutesToSeconds } from "./eval";
+import {
+  isTrue,
+  minutesToMilliseconds,
+  minutesToSeconds,
+  getRequiredEnv,
+  parseNumberEnv,
+  createUrl,
+} from "./eval";
 import { sendPasswordResetEmail, normalizeEmail } from "./mail.utils";
 import {
   generateVerificationCode,
@@ -23,4 +30,7 @@ export {
   checkUsername,
   checkEmail,
   checkJwtSecretKey,
+  getRequiredEnv,
+  parseNumberEnv,
+  createUrl,
 };

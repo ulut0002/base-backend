@@ -1,5 +1,5 @@
 import { EnvConfig } from "../types";
-import { isTrue } from "./utils";
+import { getRequiredEnv, isTrue, parseNumberEnv } from "./utils";
 
 let _cachedConfig: EnvConfig | null = null;
 
@@ -10,33 +10,36 @@ function loadConfig(): EnvConfig {
   // if (_cachedConfig) return _cachedConfig;
 
   _cachedConfig = {
-    BACKEND_URL: process.env.BACKEND_URL || "",
-    BACKEND_PORT: process.env.BACKEND_PORT || "",
-    BACKEND_MONGODB_URI: process.env.BACKEND_MONGODB_URI || "",
-    BACKEND_JWT_SECRET_KEY: process.env.BACKEND_JWT_SECRET_KEY || "",
-    PASSWORD_RESET_WINDOW_MINUTES: parseInt(
-      String(process.env.PASSWORD_RESET_WINDOW_MINUTES)
-    ),
-    COOKIE_NAME: process.env.COOKIE_NAME || "token",
-    COOKIE_EXPIRATION_MINUTES: parseInt(
-      `${process.env.COOKIE_EXPIRATION_MINUTES}` || "60"
-    ),
-    PASSWORD_RESET_RATE_LIMIT: parseInt(
-      String(process.env.PASSWORD_RESET_RATE_LIMIT)
-    ),
-    PASSWORD_RESET_EXPIRATION_MINUTES: parseInt(
-      String(process.env.PASSWORD_RESET_EXPIRATION_MINUTES)
-    ),
-    EMAIL_VERIFICATION_EXPIRATION_MINUTES: parseInt(
-      String(process.env.EMAIL_VERIFICATION_EXPIRATION_MINUTES)
-    ),
-    NODEMAILER_HOST: process.env.NODEMAILER_HOST,
-    NODEMAILER_PORT: parseInt(String(process.env.NODEMAILER_PORT)),
-    NODEMAILER_USER: process.env.NODEMAILER_USER, // SMTP user for authentication
-    NODEMAILER_PASS: process.env.NODEMAILER_PASS, //
-    NODEMAILER_EMAIL_FROM: process.env.NODEMAILER_EMAIL_FROM,
+    // Required environment variables
+    backendUrl: getRequiredEnv("URL"),
+    backendPort: getRequiredEnv("PORT"),
+    backendMongoDbUri: getRequiredEnv("MONGODB_URI"),
+    backendJwtSecretKey: getRequiredEnv("JWT_SECRET_KEY"),
 
-    ENABLE_SOCKET_IO: isTrue(process.env.ENABLE_SOCKET_IO),
+    // Optional environment variables with defaults
+
+    // Cookie settings
+    cookieName: process.env.COOKIE_NAME || "token",
+    cookieExpirationMinutes: parseNumberEnv("COOKIE_EXPIRATION_MINUTES") || 60,
+
+    // Password reset settings
+    passwordResetWindowMinutes: parseNumberEnv("PASSWORD_RESET_WINDOW_MINUTES"),
+    passwordResetRateLimit: parseNumberEnv("PASSWORD_RESET_RATE_LIMIT"),
+    passwordResetExpirationMinutes: parseNumberEnv(
+      "PASSWORD_RESET_EXPIRATION_MINUTES"
+    ),
+    emailVerificationExpirationMinutes: parseNumberEnv(
+      "EMAIL_VERIFICATION_EXPIRATION_MINUTES"
+    ),
+
+    // Nodemailer settings
+    nodemailerHost: process.env.NODEMAILER_HOST,
+    nodemailerPort: parseNumberEnv("NODEMAILER_PORT"),
+    nodemailerUser: process.env.NODEMAILER_USER, // SMTP user for authentication
+    nodemailerPass: process.env.NODEMAILER_PASS, // SMTP password for authentication
+    nodemailerEmailFrom: process.env.NODEMAILER_EMAIL_FROM, // Default "from" email address
+
+    enableSocketIo: isTrue(process.env.ENABLE_SOCKET_IO),
   };
   return _cachedConfig;
 }
@@ -48,8 +51,8 @@ function loadConfig(): EnvConfig {
 function getBackendUrl(): string | undefined {
   const config = loadConfig();
 
-  const backendUrl = config.BACKEND_URL;
-  const backendPort = config.BACKEND_PORT;
+  const backendUrl = config.backendUrl;
+  const backendPort = config.backendPort;
 
   if (!backendUrl || !backendPort) {
     return undefined;

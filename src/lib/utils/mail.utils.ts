@@ -8,18 +8,18 @@ const createTransporter = (): Transporter => {
   const config = loadConfig();
 
   assertConfigVarsExist([
-    ["NODEMAILER_HOST", config.NODEMAILER_HOST],
-    ["NODEMAILER_PORT", config.NODEMAILER_PORT],
-    ["NODEMAILER_USER", config.NODEMAILER_USER],
-    ["NODEMAILER_PASS", config.NODEMAILER_PASS],
-    ["NODEMAILER_EMAIL_FROM", config.NODEMAILER_EMAIL_FROM],
+    ["NODEMAILER_HOST", config.nodemailerHost],
+    ["NODEMAILER_PORT", config.nodemailerPort],
+    ["NODEMAILER_USER", config.nodemailerUser],
+    ["NODEMAILER_PASS", config.nodemailerPass],
+    ["NODEMAILER_EMAIL_FROM", config.nodemailerEmailFrom],
   ]);
   const transporter = nodemailer.createTransport({
-    host: config.NODEMAILER_HOST,
-    port: config.NODEMAILER_PORT,
+    host: config.nodemailerHost,
+    port: config.nodemailerPort,
     auth: {
-      user: config.NODEMAILER_USER,
-      pass: config.NODEMAILER_PASS,
+      user: config.nodemailerUser,
+      pass: config.nodemailerPass,
     },
   });
 
@@ -28,9 +28,9 @@ const createTransporter = (): Transporter => {
 
 const getFromEmail = (): string => {
   const config = loadConfig();
-  let fromEmail = config.NODEMAILER_USER;
-  if (config.NODEMAILER_EMAIL_FROM) {
-    fromEmail = `${config.NODEMAILER_EMAIL_FROM} <${fromEmail}>`;
+  let fromEmail = config.nodemailerUser;
+  if (config.nodemailerEmailFrom) {
+    fromEmail = `${config.nodemailerEmailFrom} <${fromEmail}>`;
   }
   return fromEmail || "";
 };

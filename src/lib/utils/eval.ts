@@ -45,4 +45,37 @@ const minutesToSeconds = (minutes: number): number => {
   return minutes * 60;
 };
 
-export { isTrue, minutesToMilliseconds, minutesToSeconds };
+function getRequiredEnv(key: string): string {
+  const value = process.env[key];
+  if (!value || value.trim() === "") {
+    throw new Error(`Missing required environment variable: ${key}`);
+  }
+  return value;
+}
+
+function parseNumberEnv(key: string, defaultValue?: number): number {
+  const value = process.env[key];
+  const parsed = value !== undefined ? parseInt(value, 10) : NaN;
+  if (!isNaN(parsed)) {
+    return parsed;
+  }
+  if (defaultValue !== undefined) {
+    return defaultValue;
+  }
+  throw new Error(`Invalid or missing numeric env var: ${key}`);
+}
+
+function createUrl(host: string, port?: string): string {
+  const url = new URL(host);
+  if (port) url.port = port;
+  return url.toString().replace(/\/$/, ""); // Remove trailing slash if any
+}
+
+export {
+  isTrue,
+  minutesToMilliseconds,
+  minutesToSeconds,
+  getRequiredEnv,
+  parseNumberEnv,
+  createUrl,
+};

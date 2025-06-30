@@ -4,7 +4,7 @@ import {
   UserDocument,
   LinkedObject,
 } from "./user.types";
-import { NormalizeOptions } from "./email.types";
+import { NormalizeOptions, MailProfiles, MailProfile } from "./email.types";
 import {
   RegisterUserInput,
   LoginUserInput,
@@ -37,7 +37,7 @@ export type {
 
 export { UserRole };
 
-export type { NormalizeOptions };
+export type { NormalizeOptions, MailProfiles, MailProfile };
 
 export type {
   ResetPasswordRequest,

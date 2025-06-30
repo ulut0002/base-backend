@@ -16,8 +16,8 @@ interface MeMiddlewareMap {
   username: RequestHandler[];
   deactivate: RequestHandler[];
   reactivate: RequestHandler[];
-  singleUserId: RequestHandler[];
-  delete: RequestHandler[];
+  updateUserById: RequestHandler[];
+  deleteUserById: RequestHandler[];
   publicProfile: RequestHandler[];
 }
 

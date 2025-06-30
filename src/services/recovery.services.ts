@@ -97,7 +97,7 @@ const createVerificationToken = async ({
   if (!existingCode) {
     const config = loadConfig();
     const VERIFICATION_EXPIRATION_MINUTES =
-      config.EMAIL_VERIFICATION_EXPIRATION_MINUTES || 10;
+      config.emailVerificationExpirationMinutes || 10;
 
     const code = generateVerificationCode(); // e.g., "58493"
     const linkToken = crypto.randomBytes(32).toString("hex");
@@ -166,10 +166,10 @@ const requestPasswordReset = async ({
     );
   }
 
-  const MAX_RESET_REQUESTS = config.PASSWORD_RESET_RATE_LIMIT || 5;
-  const WINDOW_MINUTES = config.PASSWORD_RESET_WINDOW_MINUTES || 15;
+  const MAX_RESET_REQUESTS = config.passwordResetRateLimit || 5;
+  const WINDOW_MINUTES = config.passwordResetWindowMinutes || 15;
   const PASSWORD_RESET_EXPIRATION_MINUTES =
-    config.PASSWORD_RESET_EXPIRATION_MINUTES || 10;
+    config.passwordResetExpirationMinutes || 10;
 
   // ✅ Proper rate-limiting check
   const windowStart = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000);

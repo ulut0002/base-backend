@@ -13,6 +13,7 @@ import {
 } from "./errors";
 import { configureApp } from "./express";
 import { logger } from "./logger";
+import { getMailProfile, getMailProfiles, setMailProfiles } from "./mailConfig";
 
 export { createValidationErrorCollector, createErrorResponse };
 export {
@@ -29,3 +30,4 @@ export {
 export { logger };
 export { connectToDatabase, disconnectFromDatabase };
 export { configureApp };
+export { setMailProfiles, getMailProfiles, getMailProfile };

@@ -12,6 +12,7 @@ import {
   updateEmail,
   updateUsername,
 } from "../controllers";
+import { postMeMiddleware, preMeMiddleware } from "../middleware/me.middleware";
 
 const meRouter: Router = express.Router();
 
@@ -33,7 +34,13 @@ const meRouter: Router = express.Router();
  *       200:
  *         description: User profile retrieved
  */
-meRouter.get("/", passport.authenticate("jwt", { session: false }), profile);
+meRouter.get(
+  "/",
+  ...preMeMiddleware.profile,
+  passport.authenticate("jwt", { session: false }),
+  profile,
+  ...postMeMiddleware.profile
+);
 
 /**
  * @openapi
@@ -59,8 +66,10 @@ meRouter.get("/", passport.authenticate("jwt", { session: false }), profile);
  */
 meRouter.put(
   "/email",
+  ...preMeMiddleware.email,
   passport.authenticate("jwt", { session: false }),
-  updateEmail
+  updateEmail,
+  ...postMeMiddleware.email
 );
 
 /**
@@ -87,8 +96,10 @@ meRouter.put(
  */
 meRouter.put(
   "/username",
+  ...preMeMiddleware.username,
   passport.authenticate("jwt", { session: false }),
-  updateUsername
+  updateUsername,
+  ...postMeMiddleware.username
 );
 
 /**
@@ -105,8 +116,10 @@ meRouter.put(
  */
 meRouter.post(
   "/deactivate",
+  ...preMeMiddleware.deactivate,
   passport.authenticate("jwt", { session: false }),
-  deactivateAccount
+  deactivateAccount,
+  ...postMeMiddleware.deactivate
 );
 
 /**
@@ -123,8 +136,10 @@ meRouter.post(
  */
 meRouter.post(
   "/reactivate",
+  ...preMeMiddleware.reactivate,
   passport.authenticate("jwt", { session: false }),
-  reactivateAccount
+  reactivateAccount,
+  ...postMeMiddleware.reactivate
 );
 
 /**
@@ -155,8 +170,10 @@ meRouter.post(
  */
 meRouter.patch(
   "/:id",
+  ...preMeMiddleware.updateUserById,
   passport.authenticate("jwt", { session: false }),
-  patchUpdateAccount
+  patchUpdateAccount,
+  ...postMeMiddleware.updateUserById
 );
 
 /**
@@ -180,8 +197,10 @@ meRouter.patch(
  */
 meRouter.delete(
   "/:id",
+  ...preMeMiddleware.deleteUserById,
   passport.authenticate("jwt", { session: false }),
-  deleteAccount
+  deleteAccount,
+  ...postMeMiddleware.deleteUserById
 );
 
 /**
@@ -209,6 +228,11 @@ meRouter.delete(
  *       404:
  *         description: User not found
  */
-meRouter.get("/users/public/:username", fetchPublicProfile);
+meRouter.get(
+  "/users/public/:username",
+  ...preMeMiddleware.publicProfile,
+  fetchPublicProfile,
+  ...postMeMiddleware.publicProfile
+);
 
 export { meRouter };
