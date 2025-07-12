@@ -1,4 +1,3 @@
-import { RequestHandler } from "express";
 import {
   changePasswordPre1,
   changePasswordPre2,

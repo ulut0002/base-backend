@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 
-const mePre1 = (req: Request, res: Response, next: NextFunction) => {
+const meProfilePre1 = (req: Request, res: Response, next: NextFunction) => {
   console.log("Pre-me #1 middleware executed");
   next();
 };
 
-const mePre2 = (req: Request, res: Response, next: NextFunction) => {
+const meProfilePre2 = (req: Request, res: Response, next: NextFunction) => {
   console.log("Pre-me #2 middleware executed");
   next();
 };
@@ -101,8 +101,8 @@ const publicProfilePre2 = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export {
-  mePre1,
-  mePre2,
+  meProfilePre1,
+  meProfilePre2,
   updateEmailPre1,
   updateEmailPre2,
   updateUsernamePre1,

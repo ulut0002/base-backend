@@ -12,7 +12,8 @@ import {
   updateEmail,
   updateUsername,
 } from "../controllers";
-import { postMeMiddleware, preMeMiddleware } from "../middleware/me.middleware";
+import { postMeMiddleware, preMeMiddleware } from "../middleware";
+// import { postMeMiddleware, preMeMiddleware } from "../middleware/me.middleware";
 
 const meRouter: Router = express.Router();
 

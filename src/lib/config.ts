@@ -12,6 +12,7 @@ function loadConfig(): EnvConfig {
   _cachedConfig = {
     // Required environment variables
     backendUrl: getRequiredEnv("URL"),
+
     backendPort: getRequiredEnv("PORT"),
     backendMongoDbUri: getRequiredEnv("MONGODB_URI"),
     backendJwtSecretKey: getRequiredEnv("JWT_SECRET_KEY"),
@@ -33,10 +34,12 @@ function loadConfig(): EnvConfig {
     passwordResetWindowMinutes: parseNumberEnv("PASSWORD_RESET_WINDOW_MINUTES"),
     passwordResetRateLimit: parseNumberEnv("PASSWORD_RESET_RATE_LIMIT"),
     passwordResetExpirationMinutes: parseNumberEnv(
-      "PASSWORD_RESET_EXPIRATION_MINUTES"
+      "PASSWORD_RESET_EXPIRATION_MINUTES",
+      10
     ),
     emailVerificationExpirationMinutes: parseNumberEnv(
-      "EMAIL_VERIFICATION_EXPIRATION_MINUTES"
+      "EMAIL_VERIFICATION_EXPIRATION_MINUTES",
+      0
     ),
 
     // Nodemailer settings

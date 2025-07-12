@@ -11,7 +11,7 @@ import {
   recoveryRouter,
   rootRouter,
   securityRouter,
-  swaggerRoute,
+  // swaggerRoute,
 } from "./routes";
 
 import {
@@ -33,9 +33,6 @@ import { HTTP_STATUS } from "./lib/constants";
 // -------------------------
 
 dotenv.config();
-const config = loadConfig();
-const backendUrl = getBackendUrl();
-const PORT = config.backendPort!;
 
 // -------------------------
 // Application Entry Point
@@ -47,6 +44,10 @@ const PORT = config.backendPort!;
  * mounts routes, and starts listening for requests.
  */
 async function initializeApp(): Promise<void> {
+  dotenv.config();
+  const config = loadConfig();
+  const backendUrl = getBackendUrl();
+  const PORT = config.backendPort!;
   try {
     await connectToDatabase();
     logger.info("Connected to MongoDB");
@@ -69,7 +70,7 @@ async function initializeApp(): Promise<void> {
   app.use("/security", securityRouter);
   app.use("/admin", adminRouter);
   app.use("/recovery", recoveryRouter);
-  app.use("/docs", swaggerRoute);
+  // app.use("/docs", swaggerRoute);
 
   app.use((req: Request, res: Response) => {
     res.status(HTTP_STATUS.NOT_FOUND).json({ error: "Route not found" });

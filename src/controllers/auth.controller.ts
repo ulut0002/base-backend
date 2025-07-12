@@ -80,6 +80,10 @@ const register = async (
 
   const jwtSecretKey = envConfig.backendJwtSecretKey || "";
 
+  if (!envConfig.userUsernameRequired) {
+    username = email; // Use email as username if not required
+  }
+
   username = username.trim();
   email = email.trim().toLowerCase();
 
