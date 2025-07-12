@@ -10,6 +10,12 @@ type EnvConfig = Partial<{
   cookieName: string; // Name of the HTTP-only cookie used for JWTs
   cookieExpirationMinutes: number; // Expiration time for the JWT cookie in minutes
 
+  // REGISTRATION
+  registerEnabled: boolean; // Whether user registration is enabled
+  userUsernameRequired: boolean; // Whether username is required for registration
+  userUsernameMinLength?: number; // Minimum length for usernames
+  userUsernameMaxLength?: number; // Maximum length for usernames
+
   passwordResetWindowMinutes: number;
   passwordResetRateLimit: number; // Rate limit for password reset requests
   passwordResetExpirationMinutes: number; // Expiration time for password reset codes

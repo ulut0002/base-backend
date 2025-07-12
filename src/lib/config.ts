@@ -16,6 +16,11 @@ function loadConfig(): EnvConfig {
     backendMongoDbUri: getRequiredEnv("MONGODB_URI"),
     backendJwtSecretKey: getRequiredEnv("JWT_SECRET_KEY"),
 
+    registerEnabled: isTrue(process.env.REGISTER_ENABLED),
+    userUsernameRequired: isTrue(process.env.USER_USERNAME_REQUIRED),
+    userUsernameMinLength: parseNumberEnv("USER_USERNAME_MIN_LENGTH"),
+    userUsernameMaxLength: parseNumberEnv("USER_USERNAME_MAX_LENGTH"),
+
     // Optional environment variables with defaults
 
     // Cookie settings

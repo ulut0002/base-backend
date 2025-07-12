@@ -63,7 +63,7 @@ const register = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  let { username = "", email = "", password = "", name = "" } = req.body;
+  let { username = "", email = "", password = "" } = req.body;
   username = username.trim();
   email = email.trim().toLowerCase();
 

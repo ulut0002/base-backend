@@ -46,57 +46,49 @@ const PORT = config.backendPort!;
  * Connects to database, sets up authentication and middleware,
  * mounts routes, and starts listening for requests.
  */
-function initializeApp(): void {
-  connectToDatabase()
-    .then(() => {
-      logger.info("Connected to MongoDB");
-      return initializeBusinessLogic();
-    })
-    .catch((err) => {
-      logger.error("Failed to connect to MongoDB", err);
-      throw err;
-    })
+async function initializeApp(): Promise<void> {
+  try {
+    await connectToDatabase();
+    logger.info("Connected to MongoDB");
+  } catch (error) {
+    logger.error("Failed to connect to MongoDB", error);
+  }
+  logger.info("Business logic initialized");
 
-    .then(() => {
-      logger.info("Business logic initialized");
+  await initializeBusinessLogic();
 
-      const app = express();
-      const { server } = createSocketServer(app);
+  const app = express();
+  const { server } = createSocketServer(app);
 
-      configureJwtStrategy(passport);
-      configureApp(app);
+  configureJwtStrategy(passport);
+  configureApp(app);
 
-      app.use("/", rootRouter);
-      app.use("/auth", authRouter);
-      app.use("/profile", meRouter);
-      app.use("/security", securityRouter);
-      app.use("/admin", adminRouter);
-      app.use("/recovery", recoveryRouter);
-      app.use("/docs", swaggerRoute);
+  app.use("/", rootRouter);
+  app.use("/auth", authRouter);
+  app.use("/profile", meRouter);
+  app.use("/security", securityRouter);
+  app.use("/admin", adminRouter);
+  app.use("/recovery", recoveryRouter);
+  app.use("/docs", swaggerRoute);
 
-      app.use((req: Request, res: Response) => {
-        res.status(HTTP_STATUS.NOT_FOUND).json({ error: "Route not found" });
-      });
+  app.use((req: Request, res: Response) => {
+    res.status(HTTP_STATUS.NOT_FOUND).json({ error: "Route not found" });
+  });
 
-      app.use(errorHandler);
+  app.use(errorHandler);
 
-      server.listen(PORT, () => {
-        logger.info(`Server running at ${backendUrl}`);
-      });
+  server.listen(PORT, () => {
+    logger.info(`Server running at ${backendUrl}`);
+  });
 
-      process.on("SIGINT", async () => {
-        logger.info("Shutting down gracefully...");
-        await disconnectFromDatabase();
-        server.close(() => {
-          logger.info("HTTP server closed");
-          process.exit(0);
-        });
-      });
-    })
-    .catch((err) => {
-      logger.error("Failed during app setup or server start", err);
-      process.exit(1);
+  process.on("SIGINT", async () => {
+    logger.info("Shutting down gracefully...");
+    await disconnectFromDatabase();
+    server.close(() => {
+      logger.info("HTTP server closed");
+      process.exit(0);
     });
+  });
 }
 
 // -------------------------
