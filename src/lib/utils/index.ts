@@ -14,7 +14,7 @@ import {
 } from "./password.utils";
 import {
   checkUsername,
-  checkJwtSecretKey,
+  checkAuthConfiguration,
   checkEmail,
 } from "./validations.utils";
 
@@ -29,7 +29,7 @@ export {
   generatePasswordResetToken,
   checkUsername,
   checkEmail,
-  checkJwtSecretKey,
+  checkAuthConfiguration,
   getRequiredEnv,
   parseNumberEnv,
   createUrl,

@@ -1,4 +1,8 @@
-import { postAuthMiddleware, preAuthMiddleware } from "./auth.middleware";
+import {
+  postAuthMiddleware,
+  preAuthMiddleware,
+  completeAuthMiddleware,
+} from "./auth.middleware";
 import { i18nMiddleware } from "./i18n";
 
 import {
@@ -11,4 +15,4 @@ import { checkRole, ensureBody } from "./request.middleware";
 export { ensureBody, checkRole };
 export { generalLimiter, loginLimiter, apiLimiter };
 export { i18nMiddleware };
-export { preAuthMiddleware, postAuthMiddleware };
+export { preAuthMiddleware, postAuthMiddleware, completeAuthMiddleware };

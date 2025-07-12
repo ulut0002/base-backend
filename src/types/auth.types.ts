@@ -1,11 +1,20 @@
 // src/types/auth.types.ts
 
+import { FieldIssue } from "../lib";
+import { TypeOrNull } from "./generic.types";
+
 interface RegisterUserInput {
   username: string;
   email: string;
   normalizedEmail?: string;
   password: string;
   jwtSecretKey: string;
+}
+
+interface RegisterUserResult {
+  token?: TypeOrNull<string>;
+  userObject?: any;
+  issues?: FieldIssue[];
 }
 
 interface LoginUserInput {
@@ -36,6 +45,7 @@ type SessionData = {
 
 export type {
   RegisterUserInput,
+  RegisterUserResult,
   LoginUserInput,
   VerificationCodeType,
   VerificationCodeStatus,

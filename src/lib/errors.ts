@@ -1,3 +1,4 @@
+import c from "config";
 import { ErrorCodes, HTTP_STATUS, MessageCodes } from "./constants";
 import createDebug from "debug";
 import { Request, Response, NextFunction } from "express";
@@ -53,70 +54,90 @@ const createErrorResponse = ({
   };
 };
 
+enum FieldIssueType {
+  error = "error",
+  warning = "warning",
+  message = "info",
+}
+
 /**
  * Represents a single validation error.
  * 'field' is optional to allow general errors.
  */
-type FieldError = { field?: string; message: string };
+type FieldIssue = {
+  type?: FieldIssueType;
+  field?: string;
+  message?: string;
+  errorType?: ApiError;
+};
 
-/**
- * Utility to collect validation errors across multiple fields.
- * This allows us to conditionally add errors based on logic,
- * and then send them all together in a consistent format.
- */
-const createValidationErrorCollector = () => {
-  const errors: FieldError[] = [];
+const messageCollector = () => {
+  const errors: FieldIssue[] = [];
+  const warnings: FieldIssue[] = [];
+  const infos: FieldIssue[] = [];
 
-  /**
-   * Adds an error conditionally.
-   * If `condition` is provided, this is treated as a field-level validation.
-   * If not, the first param is treated as a general error message.
-   */
-  const add = (
-    fieldOrMessage: string,
-    condition?: any,
-    maybeMessage?: string
-  ) => {
-    if (typeof condition !== "undefined") {
-      // Field-level error
-      if (!condition) {
-        errors.push({
-          field: fieldOrMessage,
-          message: maybeMessage || "This field is required.",
+  const createAdder =
+    (targetList: FieldIssue[], type: FieldIssueType) =>
+    (field: string, condition?: any, message?: string): void => {
+      if (typeof condition !== "undefined") {
+        if (!condition) {
+          targetList.push({
+            type,
+            field: field,
+            message: message,
+          });
+        }
+      } else {
+        // General/global issue
+        targetList.push({
+          type,
+          message: field,
         });
       }
-    } else {
-      // General/global error
-      errors.push({ message: fieldOrMessage });
-    }
-  };
+    };
 
-  /**
-   * Checks if any errors have been collected.
-   */
+  const addError = createAdder(errors, FieldIssueType.error);
+  const addWarning = createAdder(warnings, FieldIssueType.warning);
+  const addInfo = createAdder(infos, FieldIssueType.message);
+
   const hasErrors = () => errors.length > 0;
+  const getErrors = () => errors;
+  const hasWarnings = () => warnings.length > 0;
+  const getWarnings = () => warnings;
+  const hasInfos = () => infos.length > 0;
+  const getInfos = () => infos;
 
-  /**
-   * Returns all collected errors.
-   */
-  const get = () => errors;
-
-  return { add, hasErrors, get };
+  return {
+    addError,
+    addWarning,
+    addInfo,
+    hasErrors,
+    getErrors,
+    hasWarnings,
+    getWarnings,
+    hasInfos,
+    getInfos,
+  };
 };
 
 class ApiError extends Error {
   status: number;
   name: string;
-  code: string;
-  fieldErrors: FieldError[] = [];
+  internalCode?: string;
+  fieldIssues: FieldIssue[] = [];
 
   constructor(message: string, status = HTTP_STATUS.INTERNAL_SERVER_ERROR) {
     super(message);
     this.status = status;
     this.name = "ApiError";
-    this.code = MessageCodes.API_ERROR; // Default code
-    this.fieldErrors = [];
+    this.internalCode = MessageCodes.API_ERROR; // Default code
+    this.fieldIssues = [];
     Object.setPrototypeOf(this, new.target.prototype); // Restore prototype chain
+  }
+
+  withIssues(issues: FieldIssue[]): this {
+    this.fieldIssues = issues;
+    return this;
   }
 }
 
@@ -124,7 +145,7 @@ class NotFoundError extends ApiError {
   constructor(message = "Not Found", code = ErrorCodes.NOT_FOUND) {
     super(message, HTTP_STATUS.NOT_FOUND);
     this.name = "NotFoundError";
-    this.code = code || ErrorCodes.NOT_FOUND;
+    this.internalCode = code || ErrorCodes.NOT_FOUND;
   }
 }
 
@@ -132,7 +153,7 @@ class BadRequestError extends ApiError {
   constructor(message = "Bad Request", code = ErrorCodes.BAD_REQUEST) {
     super(message, HTTP_STATUS.BAD_REQUEST);
     this.name = "BadRequestError";
-    this.code = code || ErrorCodes.BAD_REQUEST;
+    this.internalCode = code || ErrorCodes.BAD_REQUEST;
   }
 }
 
@@ -140,7 +161,7 @@ class UnauthorizedError extends ApiError {
   constructor(message = "Unauthorized", code = ErrorCodes.UNAUTHORIZED) {
     super(message, HTTP_STATUS.UNAUTHORIZED);
     this.name = "UnauthorizedError";
-    this.code = code || ErrorCodes.UNAUTHORIZED;
+    this.internalCode = code || ErrorCodes.UNAUTHORIZED;
   }
 }
 
@@ -148,24 +169,49 @@ class ForbiddenError extends ApiError {
   constructor(message = "Forbidden", code = ErrorCodes.FORBIDDEN) {
     super(message, HTTP_STATUS.FORBIDDEN);
     this.name = "ForbiddenError";
-    this.code = code || ErrorCodes.FORBIDDEN;
+    this.internalCode = code || ErrorCodes.FORBIDDEN;
+  }
+}
+
+class InternalServerError extends ApiError {
+  constructor(
+    message = "Internal Server Error",
+    code = ErrorCodes.INTERNAL_SERVER_ERROR
+  ) {
+    super(message, HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    this.name = "InternalServiceError";
+    this.internalCode = code || ErrorCodes.INTERNAL_SERVER_ERROR;
   }
 }
 
 const errorHandler = (
   error: any,
-  req: Request,
+  _req: Request,
   res: Response,
   _next: NextFunction
 ): void => {
-  debug(error);
-
   if (error instanceof ApiError) {
+    const issues = error.fieldIssues || [];
+    const errors = issues.filter(
+      (issue) => issue.type === FieldIssueType.error
+    );
+    const warnings = issues.filter(
+      (issue) => issue.type === FieldIssueType.warning
+    );
+    const messages = issues.filter(
+      (issue) => issue.type === FieldIssueType.message
+    );
+
     res.status(error.status).json({
       name: error.name || "API_ERROR",
-      code: error.code || MessageCodes.API_ERROR,
-      error: error.message,
-      fieldErrors: error.fieldErrors.length > 0 ? error.fieldErrors : [],
+      internalCode: error.internalCode || MessageCodes.API_ERROR,
+      message: error.message,
+      errors: errors,
+      warnings: warnings,
+      messages: messages,
+      errorLength: errors.length,
+      warningLength: warnings.length,
+      messageLength: messages.length,
     });
     return;
   }
@@ -199,8 +245,18 @@ const createErrorIf = <T extends ApiError>({
   }
 };
 
+const issue = (
+  field: string,
+  message: string,
+  type?: FieldIssueType
+): FieldIssue => ({
+  type: type || FieldIssueType.error,
+  field,
+  message,
+});
+
 export {
-  createValidationErrorCollector,
+  messageCollector,
   createErrorResponse,
   errorHandler,
   ApiError,
@@ -209,4 +265,8 @@ export {
   UnauthorizedError,
   ForbiddenError,
   createErrorIf,
+  FieldIssueType,
+  issue,
 };
+
+export type { FieldIssue };

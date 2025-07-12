@@ -10,14 +10,23 @@ import {
 
 import { StrategyOptions, Strategy as JwtStrategy } from "passport-jwt";
 import { PassportStatic } from "passport";
-import { ApiError, BadRequestError, createErrorIf, loadConfig } from "../lib";
+import {
+  ApiError,
+  BadRequestError,
+  createErrorIf,
+  FieldIssue,
+  FieldIssueType,
+  loadConfig,
+} from "../lib";
 import { ErrorCodes, MessageCodes, MessageTexts } from "../lib/constants";
 import {
   checkEmail,
-  checkJwtSecretKey,
+  checkAuthConfiguration,
   checkUsername,
   minutesToMilliseconds,
 } from "../lib/utils";
+import normalizeEmail from "normalize-email";
+import { Field } from "multer";
 
 /**
  * Configures Passport.js with JWT strategy.
@@ -64,40 +73,58 @@ const register = async (
   next: NextFunction
 ): Promise<void> => {
   let { username = "", email = "", password = "" } = req.body;
+  const envConfig = loadConfig();
+  if (!envConfig) {
+    throw new ApiError("Missing environment configuration", 500);
+  }
+
+  const jwtSecretKey = envConfig.backendJwtSecretKey || "";
+
   username = username.trim();
   email = email.trim().toLowerCase();
 
-  const envConfig = loadConfig();
-  const jwtSecretKey = envConfig.backendJwtSecretKey || "";
+  if (envConfig.normalizeEmails) {
+    email = normalizeEmail(email);
+  }
 
-  checkUsername(username);
-  checkEmail(email);
-  checkJwtSecretKey(jwtSecretKey);
-  createErrorIf({
-    fieldName: "Cookie Expiration in Minutes",
-    condition: envConfig.cookieExpirationMinutes,
-    ErrorType: ApiError,
-    details: "Cookie expiration time is not set",
-    code: ErrorCodes.MISSING_COOKIE_EXPIRATION,
+  let issues: FieldIssue[] = [];
+
+  issues = issues.concat(
+    checkUsername(username),
+    checkEmail(email),
+    checkAuthConfiguration(jwtSecretKey)
+  );
+  let hasErrors: boolean = false;
+  issues.forEach((issue) => {
+    req.xMeta!.addIssue(issue, issue.type ?? FieldIssueType.error);
+    if (issue.type === FieldIssueType.error) hasErrors = true;
   });
 
+  if (hasErrors) {
+    next();
+    return;
+  }
+
   try {
-    const { token } = await registerUser({
+    const { token, userObject, issues } = await registerUser({
       username,
       email,
       password,
       jwtSecretKey,
     });
 
-    res
-      .cookie(envConfig.cookieName!, token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: minutesToMilliseconds(envConfig.cookieExpirationMinutes!),
-      })
-      .status(201)
-      .json({ message: "Authentication successful" });
+    (issues ?? []).forEach((issue) => {
+      req.xMeta!.addIssue(issue, issue.type ?? FieldIssueType.error);
+      if (issue.type === FieldIssueType.error) hasErrors = true;
+    });
+
+    if (token && userObject) {
+      req.xData!.success = true;
+      req.xData!.registrationToken = token;
+      req.xData!.userId = userObject._id.toString();
+    }
+
+    next();
   } catch (err: any) {
     next(new BadRequestError(err.message || "Registration failed"));
   }
@@ -144,7 +171,7 @@ const login = async (
     details: "Cookie expiration time is not set",
     code: ErrorCodes.MISSING_COOKIE_EXPIRATION,
   });
-  checkJwtSecretKey(jwtSecretKey);
+  checkAuthConfiguration(jwtSecretKey);
 
   try {
     const { token } = await loginUser({

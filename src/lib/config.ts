@@ -18,8 +18,10 @@ function loadConfig(): EnvConfig {
 
     registerEnabled: isTrue(process.env.REGISTER_ENABLED),
     userUsernameRequired: isTrue(process.env.USER_USERNAME_REQUIRED),
+    userEmailRequired: isTrue(process.env.USER_EMAIL_REQUIRED),
     userUsernameMinLength: parseNumberEnv("USER_USERNAME_MIN_LENGTH"),
     userUsernameMaxLength: parseNumberEnv("USER_USERNAME_MAX_LENGTH"),
+    normalizeEmails: isTrue(process.env.NORMALIZE_EMAILS),
 
     // Optional environment variables with defaults
 

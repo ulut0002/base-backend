@@ -1,5 +1,5 @@
 import { UserModel } from "../modals";
-import { UserRegistrationDTO } from "../types";
+import { TypeOrNull, UserRegistrationDTO } from "../types";
 
 /**
  * Escapes special regex characters for safe matching.
@@ -49,10 +49,10 @@ const findExistingUserByUsernameOrEmail = async ({
   email,
   normalizedEmail,
 }: {
-  usernameOrEmail?: string | null;
-  username?: string | null;
-  email?: string | null;
-  normalizedEmail?: string | null;
+  usernameOrEmail?: TypeOrNull<string>;
+  username?: TypeOrNull<string>;
+  email?: TypeOrNull<string>;
+  normalizedEmail?: TypeOrNull<string>;
 }) => {
   const orConditions: Record<string, any>[] = [];
 

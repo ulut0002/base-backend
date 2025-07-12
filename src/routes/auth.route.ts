@@ -12,7 +12,11 @@ import {
   refreshToken,
   loginSuccess,
 } from "../controllers";
-import { postAuthMiddleware, preAuthMiddleware } from "../middleware";
+import {
+  completeAuthMiddleware,
+  postAuthMiddleware,
+  preAuthMiddleware,
+} from "../middleware";
 
 const authRouter: Router = express.Router();
 
@@ -20,7 +24,8 @@ authRouter.post(
   "/register",
   ...preAuthMiddleware.register,
   register,
-  ...postAuthMiddleware.register
+  ...postAuthMiddleware.register,
+  ...completeAuthMiddleware.register
 );
 
 authRouter.post(

@@ -7,6 +7,7 @@ import {
 import { NormalizeOptions, MailProfiles, MailProfile } from "./email.types";
 import {
   RegisterUserInput,
+  RegisterUserResult,
   LoginUserInput,
   VerificationCodeType,
   VerificationCodeStatus,
@@ -30,9 +31,12 @@ import {
   SecurityMiddlewareMap,
 } from "./middleware.types";
 
+import { StringOrBlank, TypeOrNull } from "./generic.types";
+
 export type { UserRegistrationDTO, NewUserInput, UserDocument, LinkedObject };
 export type {
   RegisterUserInput,
+  RegisterUserResult,
   LoginUserInput,
   VerificationCodeType,
   VerificationCodeStatus,
@@ -54,3 +58,5 @@ export type {
 export type { EnvConfig };
 
 export type { AuthMiddlewareMap, MeMiddlewareMap, SecurityMiddlewareMap };
+
+export type { StringOrBlank, TypeOrNull };

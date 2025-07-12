@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { UserRole } from "../types";
+import { FieldIssue, FieldIssueType } from "../lib";
 
 /**
  * Middleware to ensure that `req.body` is always defined and an object.
@@ -8,6 +9,45 @@ const ensureBody = (req: Request, _res: Response, next: NextFunction) => {
   if (!req.body || typeof req.body !== "object") {
     (req as any).body = {};
   }
+
+  const errors: FieldIssue[] = [];
+  const warnings: FieldIssue[] = [];
+  const messages: FieldIssue[] = [];
+
+  req.xMeta = {
+    errors: [],
+    warnings: [],
+    messages: [],
+    addIssue(issue: FieldIssue, issueType: FieldIssueType) {
+      if (issueType === FieldIssueType.error) {
+        errors.push(issue);
+      }
+      if (issueType === FieldIssueType.warning) {
+        warnings.push(issue);
+      }
+      if (issueType === FieldIssueType.message) {
+        messages.push(issue);
+      }
+    },
+    hasErrors: () => errors.length > 0,
+    hasWarnings: () => warnings.length > 0,
+    hasMessages: () => messages.length > 0,
+    getAllIssues: () => ({
+      errorLength: errors.length,
+      warningLength: warnings.length,
+      messageLength: messages.length,
+      errors: [...errors],
+      warnings: [...warnings],
+      messages: [...messages],
+    }),
+  };
+
+  req.xData = {
+    userId: null,
+    registrationToken: null,
+    success: false,
+  };
+
   next();
 };
 

@@ -1,9 +1,11 @@
+import normalizeEmail from "normalize-email";
 import { BadRequestError, loadConfig } from "../lib";
 import { ErrorCodes } from "../lib/constants";
-import { minutesToSeconds, normalizeEmail } from "../lib/utils";
+import { minutesToSeconds } from "../lib/utils";
 import {
   LoginUserInput,
   RegisterUserInput,
+  RegisterUserResult,
   SessionData,
   UserDocument,
   UserRole,
@@ -15,6 +17,7 @@ import {
 } from "./user.services";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { issue } from "../lib/errors";
 
 /**
  * Registers a new user in the system.
@@ -29,7 +32,7 @@ const registerUser = async ({
   email,
   password,
   jwtSecretKey,
-}: RegisterUserInput): Promise<{ token: string }> => {
+}: RegisterUserInput): Promise<RegisterUserResult> => {
   const envConfig = loadConfig();
   const normalizedEmail = normalizeEmail(email);
 
@@ -37,23 +40,15 @@ const registerUser = async ({
   let existingUser = await findExistingUserByUsernameOrEmail({
     username,
     email,
+    normalizedEmail,
   });
-  if (existingUser)
-    throw new BadRequestError(
-      "User already exists",
-      ErrorCodes.EXISTING_USER_FOUND
-    );
 
-  // Retry with normalized email if not found
-  if (!existingUser) {
-    existingUser = await findExistingUserByUsernameOrEmail({
-      email: normalizedEmail,
-    });
-    if (existingUser)
-      throw new BadRequestError(
-        "User already exists",
-        ErrorCodes.EXISTING_USER_FOUND
-      );
+  if (existingUser) {
+    return {
+      token: null,
+      userObject: null,
+      issues: [issue("user", "User already exists")],
+    };
   }
 
   // Hash the password before saving
@@ -72,7 +67,7 @@ const registerUser = async ({
     expiresIn: minutesToSeconds(envConfig.cookieExpirationMinutes!),
   });
 
-  return { token };
+  return { token, userObject: newUser, issues: [] };
 };
 
 /**

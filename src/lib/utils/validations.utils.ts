@@ -1,58 +1,91 @@
+import { loadConfig } from "../config";
 import { ErrorCodes } from "../constants";
-import { ApiError, BadRequestError, createErrorIf } from "../errors";
+import {
+  ApiError,
+  createErrorIf,
+  FieldIssue,
+  FieldIssueType,
+  issue,
+} from "../errors";
+import validator from "validator";
 
-const checkUsername = (username: string) => {
-  createErrorIf({
-    fieldName: "username",
-    condition: username,
-    ErrorType: BadRequestError,
-    details: "Username is required",
-    code: ErrorCodes.MISSING_USERNAME,
-  });
+const checkUsername = (username: string): FieldIssue[] => {
+  const config = loadConfig();
 
-  createErrorIf({
-    fieldName: "username",
-    condition: username.length >= 3,
-    ErrorType: BadRequestError,
-    details: "Username must be at least 3 characters long",
-    code: ErrorCodes.USERNAME_TOO_SHORT,
-  });
+  const issues: FieldIssue[] = [];
+  if (config.userUsernameRequired) {
+    if (!username) {
+      issues.push(issue("username", "Username is required"));
+    }
 
-  createErrorIf({
-    fieldName: "username",
-    condition: username.length >= 50,
-    ErrorType: BadRequestError,
-    details: "Username must be less than 50 characters long",
-    code: ErrorCodes.USERNAME_TOO_LONG,
-  });
+    if (username && config.userUsernameMinLength) {
+      if (username.length < config.userUsernameMinLength) {
+        issues.push(
+          issue(
+            "username",
+            `Username must be at least ${config.userUsernameMinLength} characters long`
+          )
+        );
+      }
+
+      if (
+        username &&
+        config.userUsernameMaxLength &&
+        username.length > config.userUsernameMaxLength
+      ) {
+        issues.push(
+          issue(
+            "username",
+            `Username must be less than ${config.userUsernameMaxLength} characters long`
+          )
+        );
+      }
+    }
+  }
+  return issues;
 };
 
-const checkEmail = (email: string) => {
-  createErrorIf({
-    fieldName: "email",
-    condition: email,
-    ErrorType: BadRequestError,
-    details: "Email is required",
-    code: ErrorCodes.MISSING_EMAIL,
-  });
+const checkEmail = (email: string): FieldIssue[] => {
+  const config = loadConfig();
+  const issues: FieldIssue[] = [];
+
+  if (config.userEmailRequired) {
+    if (!email) {
+      issues.push(issue("email", "Email is required"));
+    }
+    if (email && !validator.isEmail(email)) {
+      issues.push(issue("email", `Invalid email format ${email}`));
+    }
+  }
+
+  return issues;
 };
 
-const checkJwtSecretKey = (jwtSecretKey: string) => {
-  createErrorIf({
-    fieldName: "securityKey",
-    condition: jwtSecretKey,
-    ErrorType: ApiError,
-    details: "Security key is missing",
-    code: ErrorCodes.MISSING_SECURITY_KEY,
-  });
+const checkAuthConfiguration = (jwtSecretKey: string): FieldIssue[] => {
+  const config = loadConfig();
+  const issues: FieldIssue[] = [];
 
-  createErrorIf({
-    fieldName: "securityKey",
-    condition: jwtSecretKey.trim().length > 5,
-    ErrorType: ApiError,
-    details: "Security key is too short",
-    code: ErrorCodes.SECURITY_KEY_TOO_SHORT,
-  });
+  if (!jwtSecretKey) {
+    issues.push(issue("Jwt_Key", "JWT secret key is required. Contact admin."));
+  }
+
+  if (jwtSecretKey && jwtSecretKey.trim().length < 16) {
+    issues.push(
+      issue("Jwt_Key", "JWT secret key is too short", FieldIssueType.warning)
+    );
+  }
+
+  if (!config.cookieExpirationMinutes) {
+    issues.push(
+      issue("Cookie_Expiration", "Cookie expiration time is not set")
+    );
+  }
+
+  if (!config.cookieName) {
+    issues.push(issue("Cookie_Name", "Cookie name is not set"));
+  }
+
+  return issues;
 };
 
-export { checkUsername, checkEmail, checkJwtSecretKey };
+export { checkUsername, checkEmail, checkAuthConfiguration };
