@@ -70,7 +70,7 @@ const swaggerSpec = swaggerJsdoc({
   apis: ["./src/routes/**/*.ts"], // Recursive path for routes
 });
 
-const swaggerRoute = Router();
+const swaggerRoute: Router = Router();
 swaggerRoute.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 export { swaggerRoute };

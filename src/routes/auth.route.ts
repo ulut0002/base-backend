@@ -10,7 +10,6 @@ import {
   changePassword,
   checkAuthStatus,
   refreshToken,
-  loginSuccess,
 } from "../controllers";
 import {
   completeAuthMiddleware,
@@ -33,7 +32,7 @@ authRouter.post(
   ...preAuthMiddleware.login,
   login,
   ...postAuthMiddleware.login,
-  loginSuccess
+  ...completeAuthMiddleware.login
 );
 
 authRouter.get(

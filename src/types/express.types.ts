@@ -1,6 +1,7 @@
 import "express";
 import { FieldIssue, FieldIssueType } from "../lib";
 import { TypeOrNull } from "./generic.types";
+import { Request } from "express";
 
 // Update src/middleware/request.middleware.ts as well
 
@@ -20,12 +21,17 @@ interface RequestMetaData {
     warnings: FieldIssue[];
     messages: FieldIssue[];
   };
+  getErrors: () => FieldIssue[];
+  getWarnings: () => FieldIssue[];
+  getMessages: () => FieldIssue[];
 }
 
 export interface RequestDataState {
   userId?: TypeOrNull<string>;
   registrationToken?: TypeOrNull<string>;
+  loginToken?: TypeOrNull<string>;
   success?: TypeOrNull<boolean>;
+  language?: string;
   [key: string]: any;
 }
 
@@ -36,4 +42,23 @@ declare module "express" {
     xMeta?: RequestMetaData; // metadata for errors, warnings, messages
     xData?: RequestDataState; // state for request data
   }
+}
+
+/**
+ * Adds a list of FieldIssues to req.xMeta and returns true if there are any error-level issues.
+ */
+export function addIssuesToRequest(
+  req: Request,
+  issues: FieldIssue[] = []
+): boolean {
+  let hasErrors = false;
+
+  issues.forEach((issue) => {
+    req.xMeta?.addIssue(issue, issue.type ?? FieldIssueType.error);
+    if ((issue.type ?? FieldIssueType.error) === FieldIssueType.error) {
+      hasErrors = true;
+    }
+  });
+
+  return hasErrors;
 }

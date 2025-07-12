@@ -50,6 +50,9 @@ function loadConfig(): EnvConfig {
     nodemailerEmailFrom: process.env.NODEMAILER_EMAIL_FROM, // Default "from" email address
 
     enableSocketIo: isTrue(process.env.ENABLE_SOCKET_IO),
+    supportLanguages: process.env.SUPPORT_LANGUAGES
+      ? process.env.SUPPORT_LANGUAGES.split(",").map((lang) => lang.trim())
+      : ["en"],
   };
   return _cachedConfig;
 }

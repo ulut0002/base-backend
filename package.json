@@ -45,6 +45,7 @@
     "socket.io": "^4.8.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "typesafe-i18n": "^5.26.2",
     "validator": "^13.15.15",
     "winston": "^3.17.0"
   },

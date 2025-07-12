@@ -11,6 +11,7 @@ import {
   recoveryRouter,
   rootRouter,
   securityRouter,
+  swaggerRoute,
   // swaggerRoute,
 } from "./routes";
 
@@ -27,7 +28,7 @@ import {
 import { configureJwtStrategy } from "./controllers";
 import { createSocketServer } from "./lib/sockets";
 import { HTTP_STATUS } from "./lib/constants";
-import { log } from "console";
+import { initializeI18n } from "./middleware/i18n";
 
 // -------------------------
 // Load Environment Variables and App Config
@@ -75,7 +76,7 @@ async function initializeApp(): Promise<void> {
   app.use("/security", securityRouter);
   app.use("/admin", adminRouter);
   app.use("/recovery", recoveryRouter);
-  // app.use("/docs", swaggerRoute);
+  app.use("/docs", swaggerRoute);
 
   app.use((req: Request, res: Response) => {
     res.status(HTTP_STATUS.NOT_FOUND).json({ error: "Route not found" });

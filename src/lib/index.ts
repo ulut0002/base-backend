@@ -15,6 +15,7 @@ import {
   issue,
 } from "./errors";
 import { configureApp } from "./express";
+import { parseAcceptLanguage } from "./i18Next";
 import { logger } from "./logger";
 import { getMailProfile, getMailProfiles, setMailProfiles } from "./mailConfig";
 
@@ -40,3 +41,4 @@ export { configureApp };
 export { setMailProfiles, getMailProfiles, getMailProfile };
 export type { FieldIssue };
 export { FieldIssueType };
+export { parseAcceptLanguage };

@@ -15,10 +15,10 @@ import {
   BadRequestError,
   createErrorIf,
   FieldIssue,
-  FieldIssueType,
+  issue,
   loadConfig,
 } from "../lib";
-import { ErrorCodes, MessageCodes, MessageTexts } from "../lib/constants";
+import { ErrorCodes } from "../lib/constants";
 import {
   checkEmail,
   checkAuthConfiguration,
@@ -26,7 +26,7 @@ import {
   minutesToMilliseconds,
 } from "../lib/utils";
 import normalizeEmail from "normalize-email";
-import { Field } from "multer";
+import { addIssuesToRequest } from "../types";
 
 /**
  * Configures Passport.js with JWT strategy.
@@ -62,76 +62,78 @@ const configureJwtStrategy = (passport: PassportStatic) => {
 
 /**
  * Handles user registration.
- * - Validates input fields (username, email, password).
- * - Hashes the password.
- * - Creates a new user in the database.
- * - Issues a JWT token and sets it in an HTTP-only cookie.
+ *
+ * Flow:
+ * 1. Load environment configuration.
+ * 2. Normalize and sanitize input fields (username, email, password).
+ * 3. Validate input fields and configuration.
+ * 4. If validation passes, attempt to register the user.
+ * 5. On success, set token and user data on the request.
+ * 6. Add all issues (validation or registration-related) to req.xMeta.
+ * 7. Pass control to the next middleware (response handler).
+ *
+ * Notes:
+ * - The final response is handled by a separate middleware that inspects req.xMeta and req.xData.
  */
 const register = async (
   req: Request,
-  res: Response,
+  _: Response,
   next: NextFunction
 ): Promise<void> => {
-  let { username = "", email = "", password = "" } = req.body;
+  // Load app configuration (JWT secret, email normalization, etc.)
   const envConfig = loadConfig();
-  if (!envConfig) {
-    throw new ApiError("Missing environment configuration", 500);
-  }
-
   const jwtSecretKey = envConfig.backendJwtSecretKey || "";
 
-  if (!envConfig.userUsernameRequired) {
-    username = email; // Use email as username if not required
-  }
+  // Extract and normalize inputs from request body
+  const rawUsername = req.body.username?.trim() || "";
+  const rawEmail = req.body.email?.trim().toLowerCase() || "";
+  const password = req.body.password || "";
 
-  username = username.trim();
-  email = email.trim().toLowerCase();
+  // Normalize email if enabled in config
+  const email = envConfig.normalizeEmails ? normalizeEmail(rawEmail) : rawEmail;
 
-  if (envConfig.normalizeEmails) {
-    email = normalizeEmail(email);
-  }
+  // Use email as username if usernames are not required
+  const username = envConfig.userUsernameRequired ? rawUsername : email;
 
-  let issues: FieldIssue[] = [];
+  // Pre-registration validation (e.g., format, presence, config checks)
+  const issues: FieldIssue[] = [
+    ...checkUsername(username),
+    ...checkEmail(email),
+    ...checkAuthConfiguration(),
+  ];
 
-  issues = issues.concat(
-    checkUsername(username),
-    checkEmail(email),
-    checkAuthConfiguration(jwtSecretKey)
-  );
-  let hasErrors: boolean = false;
-  issues.forEach((issue) => {
-    req.xMeta!.addIssue(issue, issue.type ?? FieldIssueType.error);
-    if (issue.type === FieldIssueType.error) hasErrors = true;
-  });
-
-  if (hasErrors) {
-    next();
-    return;
-  }
+  // Attach validation issues to request and short-circuit if there are any errors
+  const hasPreValidationErrors = addIssuesToRequest(req, issues);
+  if (hasPreValidationErrors) return next();
 
   try {
-    const { token, userObject, issues } = await registerUser({
+    // Attempt to register the user (hash password, save to DB, issue JWT)
+    const {
+      token,
+      userObject,
+      issues: postIssues,
+    } = await registerUser({
       username,
       email,
       password,
       jwtSecretKey,
     });
 
-    (issues ?? []).forEach((issue) => {
-      req.xMeta!.addIssue(issue, issue.type ?? FieldIssueType.error);
-      if (issue.type === FieldIssueType.error) hasErrors = true;
-    });
+    // Attach post-registration issues (e.g., database constraints) to request
+    const hasPostValidationErrors = addIssuesToRequest(req, postIssues);
 
-    req.xData!.userId = userObject ? userObject._id.toString() : null;
-    req.xData!.success = token ? true : false;
+    // Populate request data state for response middleware
+    req.xData!.userId = userObject?._id.toString() || null;
+    req.xData!.success = !!token;
     req.xData!.registrationToken = token || null;
 
+    // Pass control to next response handler
     next();
   } catch (err: any) {
+    // Unexpected failure (e.g., DB error, hashing error)
     next(new BadRequestError(err.message || "Registration failed"));
   }
 };
-
 /**
  * Handles user login.
  * - Validates input credentials.
@@ -140,75 +142,53 @@ const register = async (
  */
 const login = async (
   req: Request,
-  res: Response,
+  _: Response,
   next: NextFunction
 ): Promise<void> => {
-  let { username, password } = req.body;
-  username = username.trim();
-
-  // Validate inputs
-
+  // Load app configuration (JWT secret, email normalization, etc.)
   const envConfig = loadConfig();
   const jwtSecretKey = envConfig.backendJwtSecretKey || "";
 
-  createErrorIf({
-    fieldName: "username",
-    condition: username,
-    ErrorType: BadRequestError,
-    details: "Username is required",
-    code: ErrorCodes.MISSING_USERNAME,
-  });
-  createErrorIf({
-    fieldName: "password",
-    condition: password,
-    ErrorType: BadRequestError,
-    details: "Password is required",
-    code: ErrorCodes.MISSING_PASSWORD,
-  });
+  const rawUsernameOrEmail = req.body.username?.trim() || null;
+  const rawPassword = req.body.password || null;
 
-  createErrorIf({
-    fieldName: "Cookie Expiration in Minutes",
-    condition: envConfig.cookieExpirationMinutes,
-    ErrorType: ApiError,
-    details: "Cookie expiration time is not set",
-    code: ErrorCodes.MISSING_COOKIE_EXPIRATION,
-  });
-  checkAuthConfiguration(jwtSecretKey);
+  let { username, password } = req.body;
+
+  let issues: FieldIssue[] = [];
+
+  // Validate inputs
+  if (!username) {
+    issues.push(issue("username", "Username is required"));
+  }
+  if (!password) {
+    issues.push(issue("password", "Password is required"));
+  }
+  issues = [...issues, ...checkAuthConfiguration()];
+
+  // Attach validation issues to request and short-circuit if there are any errors
+  const hasPreValidationErrors = addIssuesToRequest(req, issues);
+  if (hasPreValidationErrors) return next();
 
   try {
-    const { token } = await loginUser({
+    const {
+      token,
+      userObject,
+      issues: postIssues,
+    } = await loginUser({
       usernameOrEmail: username,
       password,
       jwtSecretKey: jwtSecretKey!,
     });
 
-    req.authToken = token;
+    addIssuesToRequest(req, postIssues);
+    req.xData!.userId = userObject?._id.toString() || null;
+    req.xData!.success = !!token;
+    req.xData!.loginToken = token || null;
+
     next();
   } catch (err: any) {
     next(new BadRequestError(err.message || "Login failed"));
   }
-};
-
-const loginSuccess = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const envConfig = loadConfig();
-
-  if (!req.authToken) {
-    return next(new ApiError("Missing token", 500));
-  }
-
-  res
-    .cookie(envConfig.cookieName!, req.authToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: minutesToMilliseconds(envConfig.cookieExpirationMinutes!),
-    })
-    .status(200)
-    .json({ message: "Authentication successful" });
 };
 
 /**
@@ -326,7 +306,6 @@ const checkAuthStatus = async (req: Request, res: Response): Promise<void> => {
 export {
   register,
   login,
-  loginSuccess,
   configureJwtStrategy,
   logout,
   me,

@@ -32,6 +32,8 @@ type EnvConfig = Partial<{
   nodemailerEmailFrom: string; // Default "from" email address for sending emails
 
   enableSocketIo: boolean; // Whether to enable Socket.IO support
+
+  supportLanguages: string[]; // List of supported languages for i18n
 }>;
 
 export type { EnvConfig };

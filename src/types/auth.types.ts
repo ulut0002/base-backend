@@ -23,6 +23,12 @@ interface LoginUserInput {
   jwtSecretKey: string;
 }
 
+interface LoginUserResult {
+  token?: TypeOrNull<string>;
+  userObject?: any;
+  issues?: FieldIssue[];
+}
+
 type VerificationCodeType =
   | "PASSWORD_RESET"
   | "EMAIL_VERIFICATION"
@@ -47,6 +53,7 @@ export type {
   RegisterUserInput,
   RegisterUserResult,
   LoginUserInput,
+  LoginUserResult,
   VerificationCodeType,
   VerificationCodeStatus,
   SessionData,

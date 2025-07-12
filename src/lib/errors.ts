@@ -192,7 +192,6 @@ const errorHandler = (
 ): void => {
   if (error instanceof ApiError) {
     const issues = error.fieldIssues || [];
-    console.log(issues);
     const errors = issues.filter(
       (issue) => issue.type === FieldIssueType.error
     );

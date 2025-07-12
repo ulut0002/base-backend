@@ -4,6 +4,7 @@ import { ErrorCodes } from "../lib/constants";
 import { minutesToSeconds } from "../lib/utils";
 import {
   LoginUserInput,
+  LoginUserResult,
   RegisterUserInput,
   RegisterUserResult,
   SessionData,
@@ -80,7 +81,7 @@ const loginUser = async ({
   usernameOrEmail,
   password,
   jwtSecretKey,
-}: LoginUserInput): Promise<{ token: string }> => {
+}: LoginUserInput): Promise<LoginUserResult> => {
   const envConfig = loadConfig();
 
   // Try to find the user using raw input
@@ -96,23 +97,29 @@ const loginUser = async ({
 
   // If no user or password is found, reject
   if (!user) {
-    throw new BadRequestError("User not found", ErrorCodes.USER_NOT_FOUND);
+    return {
+      token: null,
+      userObject: null,
+      issues: [issue("user", "User not found")],
+    };
   }
 
   if (!user.password) {
-    throw new BadRequestError(
-      "Password not found",
-      ErrorCodes.USER_MISSING_PASSWORD
-    );
+    return {
+      token: null,
+      userObject: null,
+      issues: [issue("user", "User password not found")],
+    };
   }
 
   // Compare provided password with the hashed one
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw new BadRequestError(
-      "Invalid credentials",
-      ErrorCodes.PASSWORD_NOT_MATCHING
-    );
+    return {
+      token: null,
+      userObject: null,
+      issues: [issue("password", "Invalid credentials")],
+    };
   }
 
   // Sign and return JWT
@@ -120,7 +127,7 @@ const loginUser = async ({
     expiresIn: minutesToSeconds(envConfig.cookieExpirationMinutes!),
   });
 
-  return { token };
+  return { token, userObject: user, issues: [] };
 };
 
 /**

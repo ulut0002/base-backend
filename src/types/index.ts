@@ -9,6 +9,7 @@ import {
   RegisterUserInput,
   RegisterUserResult,
   LoginUserInput,
+  LoginUserResult,
   VerificationCodeType,
   VerificationCodeStatus,
   UserRole,
@@ -32,12 +33,14 @@ import {
 } from "./middleware.types";
 
 import { StringOrBlank, TypeOrNull } from "./generic.types";
+import { addIssuesToRequest } from "./express.types";
 
 export type { UserRegistrationDTO, NewUserInput, UserDocument, LinkedObject };
 export type {
   RegisterUserInput,
   RegisterUserResult,
   LoginUserInput,
+  LoginUserResult,
   VerificationCodeType,
   VerificationCodeStatus,
   SessionData,
@@ -60,3 +63,5 @@ export type { EnvConfig };
 export type { AuthMiddlewareMap, MeMiddlewareMap, SecurityMiddlewareMap };
 
 export type { StringOrBlank, TypeOrNull };
+
+export { addIssuesToRequest };

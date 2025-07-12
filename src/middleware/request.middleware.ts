@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { UserRole } from "../types";
-import { FieldIssue, FieldIssueType } from "../lib";
+import { FieldIssue, FieldIssueType, parseAcceptLanguage } from "../lib";
 
 /**
  * Middleware to ensure that `req.body` is always defined and an object.
@@ -40,12 +40,21 @@ const ensureBody = (req: Request, _res: Response, next: NextFunction) => {
       warnings: [...warnings],
       messages: [...messages],
     }),
+    getErrors: () => [...errors],
+    getWarnings: () => [...warnings],
+    getMessages: () => [...messages],
   };
+
+  const acceptLangHeader = req.headers["accept-language"];
+
+  console.log("Accept-Language header:", acceptLangHeader);
 
   req.xData = {
     userId: null,
     registrationToken: null,
+    loginToken: null,
     success: false,
+    language: parseAcceptLanguage(acceptLangHeader),
   };
 
   next();

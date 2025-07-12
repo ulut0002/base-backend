@@ -9,6 +9,7 @@ import passport from "passport";
 import multer from "multer";
 import { ensureBody, generalLimiter, i18nMiddleware } from "../middleware";
 import { getBackendUrl } from "../lib";
+import { loadLocale } from "../i18n/i18n-util.sync";
 
 /**
  * Applies global middleware configuration to the Express app.
@@ -48,7 +49,11 @@ const configureApp = (app: express.Express) => {
   app.use(compression()); // Enables gzip compression for responses
   app.use(cookieParser()); // Parses cookies from incoming requests
   app.use(bodyParser.json()); // Parses JSON bodies
-  app.use(express.json()); // Redundant, but some prefer both for clarity
+
+  // // -------------------------
+  // // Internationalization
+  // // -------------------------
+  // app.use(i18nMiddleware);
 
   // -------------------------
   // Authentication
@@ -67,13 +72,6 @@ const configureApp = (app: express.Express) => {
   // -------------------------
 
   const upload = multer({ dest: "uploads/" }); // Placeholder for handling file uploads
-
-  // -------------------------
-  // Internationalization
-  // -------------------------
-
-  // app.use(i18nMiddleware); // Sets up language detection and translation support
-
   // -------------------------
   // API Documentation
   // -------------------------

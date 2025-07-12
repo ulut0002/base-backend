@@ -1,10 +1,10 @@
 // src/routes/admin.ts
 
-import express from "express";
+import express, { Router } from "express";
 import passport from "passport";
 import { fetchUserById, fetchUsers } from "../controllers/user.controller";
 
-const adminRouter = express.Router();
+const adminRouter: Router = express.Router();
 
 /**
  * @openapi

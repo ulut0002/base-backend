@@ -1,12 +1,6 @@
 import { loadConfig } from "../config";
-import { ErrorCodes } from "../constants";
-import {
-  ApiError,
-  createErrorIf,
-  FieldIssue,
-  FieldIssueType,
-  issue,
-} from "../errors";
+
+import { FieldIssue, FieldIssueType, issue } from "../errors";
 import validator from "validator";
 
 const checkUsername = (username: string): FieldIssue[] => {
@@ -61,15 +55,18 @@ const checkEmail = (email: string): FieldIssue[] => {
   return issues;
 };
 
-const checkAuthConfiguration = (jwtSecretKey: string): FieldIssue[] => {
+const checkAuthConfiguration = (): FieldIssue[] => {
   const config = loadConfig();
   const issues: FieldIssue[] = [];
 
-  if (!jwtSecretKey) {
+  if (!config.backendJwtSecretKey) {
     issues.push(issue("Jwt_Key", "JWT secret key is required. Contact admin."));
   }
 
-  if (jwtSecretKey && jwtSecretKey.trim().length < 16) {
+  if (
+    config.backendJwtSecretKey &&
+    config.backendJwtSecretKey.trim().length < 16
+  ) {
     issues.push(
       issue("Jwt_Key", "JWT secret key is too short", FieldIssueType.warning)
     );
