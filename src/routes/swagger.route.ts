@@ -38,7 +38,6 @@ import { getBackendUrl } from "../lib";
  *         description: Successful login
  */
 
-console.log("Setting up Swagger API documentation...", getBackendUrl());
 const swaggerSpec = swaggerJsdoc({
   definition: {
     openapi: "3.0.0",

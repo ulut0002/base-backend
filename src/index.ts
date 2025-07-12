@@ -27,6 +27,7 @@ import {
 import { configureJwtStrategy } from "./controllers";
 import { createSocketServer } from "./lib/sockets";
 import { HTTP_STATUS } from "./lib/constants";
+import { log } from "console";
 
 // -------------------------
 // Load Environment Variables and App Config
@@ -44,11 +45,15 @@ dotenv.config();
  * mounts routes, and starts listening for requests.
  */
 async function initializeApp(): Promise<void> {
+  logger.info("Initializing application...");
   dotenv.config();
   const config = loadConfig();
   const backendUrl = getBackendUrl();
   const PORT = config.backendPort!;
+  logger.info("Environment variables loaded successfully");
+
   try {
+    logger.info("Connecting to MongoDB...");
     await connectToDatabase();
     logger.info("Connected to MongoDB");
   } catch (error) {
