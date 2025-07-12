@@ -122,11 +122,9 @@ const register = async (
       if (issue.type === FieldIssueType.error) hasErrors = true;
     });
 
-    if (token && userObject) {
-      req.xData!.success = true;
-      req.xData!.registrationToken = token;
-      req.xData!.userId = userObject._id.toString();
-    }
+    req.xData!.userId = userObject ? userObject._id.toString() : null;
+    req.xData!.success = token ? true : false;
+    req.xData!.registrationToken = token || null;
 
     next();
   } catch (err: any) {

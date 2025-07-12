@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError, loadConfig } from "../lib";
 import { minutesToMilliseconds } from "../lib/utils";
+import { log } from "console";
 
 const registerComplete = (req: Request, res: Response, next: NextFunction) => {
   const envConfig = loadConfig();
@@ -14,9 +15,16 @@ const registerComplete = (req: Request, res: Response, next: NextFunction) => {
       })
       .status(201)
       .json({ message: "Authentication successful" });
+    return;
   } else {
-    if (!req.authToken) {
-      return next(new BadRequestError("Missing token"));
+    if (!req.xData!.token) {
+      next(
+        new BadRequestError("User already exists")
+          .withIssues(req.xMeta!.errors)
+          .withIssues(req.xMeta!.warnings)
+          .withIssues(req.xMeta!.messages)
+      );
+      return;
     }
   }
 

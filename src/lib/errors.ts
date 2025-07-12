@@ -136,7 +136,7 @@ class ApiError extends Error {
   }
 
   withIssues(issues: FieldIssue[]): this {
-    this.fieldIssues = issues;
+    this.fieldIssues = [...this.fieldIssues, ...issues];
     return this;
   }
 }
@@ -186,12 +186,13 @@ class InternalServerError extends ApiError {
 
 const errorHandler = (
   error: any,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction
 ): void => {
   if (error instanceof ApiError) {
     const issues = error.fieldIssues || [];
+    console.log(issues);
     const errors = issues.filter(
       (issue) => issue.type === FieldIssueType.error
     );
@@ -206,12 +207,7 @@ const errorHandler = (
       name: error.name || "API_ERROR",
       internalCode: error.internalCode || MessageCodes.API_ERROR,
       message: error.message,
-      errors: errors,
-      warnings: warnings,
-      messages: messages,
-      errorLength: errors.length,
-      warningLength: warnings.length,
-      messageLength: messages.length,
+      issues: req.xMeta!.getAllIssues(),
     });
     return;
   }
