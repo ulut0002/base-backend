@@ -23,7 +23,6 @@ import {
   checkEmail,
   checkAuthConfiguration,
   checkUsername,
-  minutesToMilliseconds,
 } from "../lib/utils";
 import normalizeEmail from "normalize-email";
 import { addIssuesToRequest } from "../types";
@@ -97,7 +96,7 @@ const register = async (
 
   // Pre-registration validation (e.g., format, presence, config checks)
   const issues: FieldIssue[] = [
-    ...checkUsername(username),
+    ...checkUsername(username, req.t),
     ...checkEmail(email),
     ...checkAuthConfiguration(),
   ];

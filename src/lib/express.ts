@@ -53,7 +53,7 @@ const configureApp = (app: express.Express) => {
   // // -------------------------
   // // Internationalization
   // // -------------------------
-  // app.use(i18nMiddleware);
+  app.use(i18nMiddleware);
 
   // -------------------------
   // Authentication

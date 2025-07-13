@@ -2,6 +2,7 @@ import "express";
 import { FieldIssue, FieldIssueType } from "../lib";
 import { TypeOrNull } from "./generic.types";
 import { Request } from "express";
+import { TFunction } from "i18next";
 
 // Update src/middleware/request.middleware.ts as well
 
@@ -41,6 +42,7 @@ declare module "express" {
     authUser?: any; // optional: attach user data if needed
     xMeta?: RequestMetaData; // metadata for errors, warnings, messages
     xData?: RequestDataState; // state for request data
+    t?: TFunction;
   }
 }
 

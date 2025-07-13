@@ -4,27 +4,37 @@ import i18nextMiddleware from "i18next-express-middleware";
 import path from "path";
 
 export async function initializeI18n(): Promise<void> {
-  await i18next
-    .use(Backend)
-    .use(i18nextMiddleware.LanguageDetector)
-    .init({
-      fallbackLng: "en",
-      preload: ["en", "tr"],
-      ns: ["translation"],
-      defaultNS: "translation",
-      interpolation: {
-        escapeValue: false,
-      },
-      backend: {
-        loadPath: path.join(__dirname, "locales/{{lng}}/translation.json"),
-      },
-      detection: {
-        order: ["querystring", "cookie", "header"],
-        lookupQuerystring: "lng",
-        lookupCookie: "lang",
-        caches: false,
-      },
-    });
+  try {
+    await i18next
+      .use(Backend)
+      .use(i18nextMiddleware.LanguageDetector)
+      .init({
+        fallbackLng: "en",
+        preload: ["en", "tr"],
+        ns: ["translation"],
+        defaultNS: "translation",
+        interpolation: {
+          escapeValue: false,
+        },
+        backend: {
+          loadPath: path.join(
+            __dirname,
+            "../src/locales/{{lng}}/translation.json"
+          ),
+        },
+        debug: true,
+        detection: {
+          order: ["querystring", "cookie", "header"],
+          lookupQuerystring: "lng",
+          lookupCookie: "lang",
+          caches: false,
+        },
+      });
+    console.log("i18next initialized successfully");
+  } catch (error) {
+    console.error("Failed to initialize i18next", error);
+    throw error;
+  }
 }
 
 export const i18nMiddleware = i18nextMiddleware.handle(i18next);

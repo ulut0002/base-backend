@@ -1,10 +1,13 @@
+import { TFunction } from "i18next";
 import { loadConfig } from "../config";
 
 import { FieldIssue, FieldIssueType, issue } from "../errors";
 import validator from "validator";
 
-const checkUsername = (username: string): FieldIssue[] => {
+const checkUsername = (username: string, t?: TFunction): FieldIssue[] => {
   const config = loadConfig();
+
+  console.log(t!("test"));
 
   const issues: FieldIssue[] = [];
   if (config.userUsernameRequired) {

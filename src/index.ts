@@ -46,6 +46,7 @@ dotenv.config();
  * mounts routes, and starts listening for requests.
  */
 async function initializeApp(): Promise<void> {
+  await initializeI18n();
   logger.info("Initializing application...");
   dotenv.config();
   const config = loadConfig();
