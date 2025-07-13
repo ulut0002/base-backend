@@ -52,19 +52,21 @@ authRouter.get(
   ...completeAuthMiddleware.me
 );
 
-authRouter.post(
+authRouter.patch(
   "/change-password",
   passport.authenticate("jwt", { session: false }),
   ...preAuthMiddleware.changePassword,
   changePassword,
-  ...postAuthMiddleware.changePassword
+  ...postAuthMiddleware.changePassword,
+  ...completeAuthMiddleware.changePassword
 );
 
 authRouter.post(
   "/refresh-token",
   ...preAuthMiddleware.refreshToken,
   refreshToken,
-  ...postAuthMiddleware.refreshToken
+  ...postAuthMiddleware.refreshToken,
+  ...completeAuthMiddleware.refreshToken
 );
 
 authRouter.get(
@@ -72,7 +74,8 @@ authRouter.get(
   passport.authenticate("jwt", { session: false }),
   ...preAuthMiddleware.status,
   checkAuthStatus,
-  ...postAuthMiddleware.status
+  ...postAuthMiddleware.status,
+  ...completeAuthMiddleware.status
 );
 
 export { authRouter };

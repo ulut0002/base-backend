@@ -16,6 +16,7 @@ import {
   checkUsername,
   checkAuthConfiguration,
   checkEmail,
+  checkPassword,
 } from "./validations.utils";
 
 export {
@@ -29,6 +30,7 @@ export {
   generatePasswordResetToken,
   checkUsername,
   checkEmail,
+  checkPassword,
   checkAuthConfiguration,
   getRequiredEnv,
   parseNumberEnv,

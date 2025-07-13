@@ -1,6 +1,8 @@
 {
   "username": "Username",
   "password": "Password",
+  "currentPassword": "Current Password",
+  "newPassword": "New Password",
   "email": "Email",
   "user": "User",
   "required": "{{field}} is required.",
@@ -15,6 +17,14 @@
     "register": {
       "userExists": "User already exists.",
       "userPasswordNotFound": "User password not found."
+    },
+    "updatePassword": {
+      "passwordMissingUppercase": "Password must contain at least one uppercase letter.",
+      "passwordMissingLowercase": "Password must contain at least one lowercase letter.",
+      "passwordMissingNumber": "Password must contain at least one number.",
+      "passwordMissingSpecialChar": "Password must contain at least one special character.",
+      "currentPasswordRequired": "Current password is required.",
+      "newPasswordRequired": "New password is required."
     }
   },
   "system": {

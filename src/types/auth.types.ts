@@ -30,6 +30,11 @@ interface LoginUserResult {
   issues?: FieldIssue[];
 }
 
+interface ChangePasswordResult {
+  userObject?: any;
+  issues?: FieldIssue[];
+}
+
 type MeResponse = {
   user: SafeUser;
 };
@@ -63,6 +68,7 @@ export type {
   LoginUserResult,
   VerificationCodeType,
   VerificationCodeStatus,
+  ChangePasswordResult,
   MeResponse,
   SessionData,
 };

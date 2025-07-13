@@ -20,6 +20,13 @@ type EnvConfig = Partial<{
   userUsernameMaxLength?: number; // Maximum length for usernames
   normalizeEmails?: boolean; // Whether to normalize email addresses
 
+  passwordMinLength: number; // Minimum length for passwords
+  passwordMaxLength: number; // Maximum length for passwords
+  passwordRequireUppercase: boolean; // Whether passwords must contain uppercase letters
+  passwordRequireLowercase: boolean; // Whether passwords must contain lowercase letters
+  passwordRequireNumbers: boolean; // Whether passwords must contain numbers
+  passwordRequireSpecialChars: boolean; // Whether passwords must contain special characters
+
   passwordResetWindowMinutes: number;
   passwordResetRateLimit: number; // Rate limit for password reset requests
   passwordResetExpirationMinutes: number; // Expiration time for password reset codes

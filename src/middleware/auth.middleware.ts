@@ -33,9 +33,12 @@ import {
 } from "./auth.post.middleware";
 import { AuthMiddlewareMap } from "../types";
 import {
+  authStatusComplete,
+  changePasswordComplete,
   loginComplete,
   logoutComplete,
   meComplete,
+  refreshTokenComplete,
   registerComplete,
 } from "./auth.complete.middleware";
 
@@ -66,7 +69,7 @@ export const completeAuthMiddleware: AuthMiddlewareMap = {
   register: [registerComplete],
   me: [meComplete],
   logout: [logoutComplete],
-  changePassword: [],
-  refreshToken: [],
-  status: [],
+  changePassword: [changePasswordComplete],
+  refreshToken: [refreshTokenComplete],
+  status: [authStatusComplete],
 };

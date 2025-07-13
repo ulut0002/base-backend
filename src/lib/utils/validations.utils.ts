@@ -67,6 +67,84 @@ const checkEmail = (email: string): FieldIssue[] => {
   return issues;
 };
 
+const checkPassword = (password: string): FieldIssue[] => {
+  const config = loadConfig();
+  const t = getGlobalT();
+  const issues: FieldIssue[] = [];
+  let more: boolean = true;
+
+  const field = t("password");
+
+  if (more) {
+    if (!password) {
+      issues.push(issue(field, t("auth.updatePassword.newPasswordRequired")));
+      more = false;
+    }
+  }
+
+  if (more) {
+    if (password.length < config.passwordMinLength!) {
+      issues.push(
+        issue(
+          field,
+          t("minLength", {
+            field,
+            min: config.passwordMinLength,
+          })
+        )
+      );
+    }
+  }
+
+  if (more) {
+    if (password.length > config.passwordMaxLength!) {
+      issues.push(
+        issue(
+          field,
+          t("maxLength", {
+            field,
+            max: config.passwordMaxLength,
+          })
+        )
+      );
+    }
+  }
+
+  if (more) {
+    if (config.passwordRequireUppercase && !/[A-Z]/.test(password)) {
+      issues.push(
+        issue(field, t("auth.updatePassword.passwordMissingUppercase"))
+      );
+    }
+  }
+
+  if (more) {
+    if (config.passwordRequireLowercase && !/[a-z]/.test(password)) {
+      issues.push(
+        issue(field, t("auth.updatePassword.passwordMissingLowercase"))
+      );
+    }
+  }
+
+  if (more) {
+    if (config.passwordRequireNumbers && !/[0-9]/.test(password)) {
+      issues.push(issue(field, t("auth.updatePassword.passwordMissingNumber")));
+    }
+  }
+
+  if (more) {
+    if (
+      config.passwordRequireSpecialChars &&
+      !/[!@#$%^&*(),.?":{}|<>_\-+=/\\[\]`~;'’]/.test(password)
+    ) {
+      issues.push(
+        issue(field, t("uth.updatePassword.passwordMissingSpecialChar"))
+      );
+    }
+  }
+
+  return issues;
+};
 const checkAuthConfiguration = (): FieldIssue[] => {
   const config = loadConfig();
   const issues: FieldIssue[] = [];
@@ -107,4 +185,4 @@ const checkAuthConfiguration = (): FieldIssue[] => {
   return issues;
 };
 
-export { checkUsername, checkEmail, checkAuthConfiguration };
+export { checkUsername, checkEmail, checkAuthConfiguration, checkPassword };

@@ -1,69 +1,92 @@
+// Auth Types
 import {
-  UserRegistrationDTO,
-  NewUserInput,
-  UserDocument,
-  LinkedObject,
-} from "./user.types";
-import { NormalizeOptions, MailProfiles, MailProfile } from "./email.types";
-import {
-  RegisterUserInput,
-  RegisterUserResult,
+  ChangePasswordResult,
   LoginUserInput,
   LoginUserResult,
-  VerificationCodeType,
-  VerificationCodeStatus,
-  UserRole,
-  SessionData,
   MeResponse,
+  RegisterUserInput,
+  RegisterUserResult,
+  SessionData,
+  UserRole,
+  VerificationCodeStatus,
+  VerificationCodeType,
 } from "./auth.types";
 
+// Config Types
 import { EnvConfig } from "./config.types";
 
-import {
-  ResetPasswordRequest,
-  ResetPasswordResult,
-  CreateVerificationRequest,
-  CreateVerificationResult,
-  VerificationStatus,
-} from "./recovery.types";
+// Email Types
+import { MailProfile, MailProfiles, NormalizeOptions } from "./email.types";
 
+// Express Types
+import { addIssuesToRequest } from "./express.types";
+
+// Generic Types
+import { StringOrBlank, TypeOrNull } from "./generic.types";
+
+// Middleware Types
 import {
   AuthMiddlewareMap,
   MeMiddlewareMap,
   SecurityMiddlewareMap,
 } from "./middleware.types";
 
-import { StringOrBlank, TypeOrNull } from "./generic.types";
-import { addIssuesToRequest } from "./express.types";
-
-export type { UserRegistrationDTO, NewUserInput, UserDocument, LinkedObject };
-export type {
-  RegisterUserInput,
-  RegisterUserResult,
-  LoginUserInput,
-  LoginUserResult,
-  VerificationCodeType,
-  VerificationCodeStatus,
-  SessionData,
-  MeResponse,
-};
-
-export { UserRole };
-
-export type { NormalizeOptions, MailProfiles, MailProfile };
-
-export type {
-  ResetPasswordRequest,
-  ResetPasswordResult,
+// Recovery Types
+import {
   CreateVerificationRequest,
   CreateVerificationResult,
+  ResetPasswordRequest,
+  ResetPasswordResult,
+  VerificationStatus,
+} from "./recovery.types";
+
+// User Types
+import {
+  LinkedObject,
+  NewUserInput,
+  UserDocument,
+  UserRegistrationDTO,
+} from "./user.types";
+
+// Auth Types Exports
+export type {
+  ChangePasswordResult,
+  LoginUserInput,
+  LoginUserResult,
+  MeResponse,
+  RegisterUserInput,
+  RegisterUserResult,
+  SessionData,
+  VerificationCodeStatus,
+  VerificationCodeType,
+};
+
+// Auth Types Named Export
+export { UserRole };
+
+// Config Types Export
+export type { EnvConfig };
+
+// Email Types Exports
+export type { MailProfile, MailProfiles, NormalizeOptions };
+
+// Recovery Types Exports
+export type {
+  CreateVerificationRequest,
+  CreateVerificationResult,
+  ResetPasswordRequest,
+  ResetPasswordResult,
   VerificationStatus,
 };
 
-export type { EnvConfig };
-
+// Middleware Types Exports
 export type { AuthMiddlewareMap, MeMiddlewareMap, SecurityMiddlewareMap };
 
+// Generic Types Exports
 export type { StringOrBlank, TypeOrNull };
 
+// Express Types Export
 export { addIssuesToRequest };
+
+// User Types Exports
+export type { LinkedObject, NewUserInput, UserDocument, UserRegistrationDTO };

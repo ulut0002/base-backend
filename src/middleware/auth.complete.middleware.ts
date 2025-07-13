@@ -70,4 +70,55 @@ const logoutComplete = (req: Request, res: Response, next: NextFunction) => {
   res.status(200).json({ message: "Logged out successfully." });
 };
 
-export { registerComplete, loginComplete, meComplete, logoutComplete };
+const changePasswordComplete = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const success = !req.xMeta?.hasErrors();
+  if (!success) {
+    return next(new BadRequestError("Change password failed"));
+  }
+  res.status(200).json({ message: "Password changed successfully" });
+};
+
+const refreshTokenComplete = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const token = req.xData?.loginToken || null;
+  if (!token) {
+    return next(new BadRequestError("Failed to refresh token"));
+  }
+
+  const envConfig = loadConfig();
+  res
+    .cookie(envConfig.cookieName!, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: minutesToMilliseconds(envConfig.cookieExpirationMinutes!),
+    })
+    .status(200)
+    .json({ message: "Token refreshed successfully" });
+};
+
+const authStatusComplete = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const isAuthenticated = !!req.user;
+  res.status(200).json({ authenticated: isAuthenticated });
+};
+
+export {
+  authStatusComplete,
+  registerComplete,
+  loginComplete,
+  meComplete,
+  logoutComplete,
+  changePasswordComplete,
+  refreshTokenComplete,
+};

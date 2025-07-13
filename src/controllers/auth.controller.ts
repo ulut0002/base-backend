@@ -12,8 +12,8 @@ import { StrategyOptions, Strategy as JwtStrategy } from "passport-jwt";
 import { PassportStatic } from "passport";
 import {
   BadRequestError,
-  createErrorIf,
   FieldIssue,
+  getGlobalT,
   issue,
   loadConfig,
   resolveT,
@@ -23,6 +23,7 @@ import {
   checkEmail,
   checkAuthConfiguration,
   checkUsername,
+  checkPassword,
 } from "../lib/utils";
 import normalizeEmail from "normalize-email";
 import { addIssuesToRequest } from "../types";
@@ -205,8 +206,8 @@ const logout = (_: Request, __: Response, next: NextFunction): void => {
  * Assumes passport middleware has attached `req.user`.
  */
 const me = async (
-  req: Request,
-  res: Response,
+  _: Request,
+  __: Response,
   next: NextFunction
 ): Promise<void> => {
   next();
@@ -262,29 +263,30 @@ const changePassword = async (
 ): Promise<void> => {
   const user = req.user as any;
   const { currentPassword, newPassword } = req.body;
-  createErrorIf({
-    fieldName: "currentPassword",
-    condition: currentPassword,
-    ErrorType: BadRequestError,
-    details: "Current password is required",
-    code: ErrorCodes.MISSING_PASSWORD,
-  });
-  createErrorIf({
-    fieldName: "newPassword",
-    condition: newPassword,
-    ErrorType: BadRequestError,
-    details: "New password is required",
-    code: ErrorCodes.MISSING_PASSWORD,
-  });
+  const issues: FieldIssue[] = [];
+  const t = getGlobalT();
+
+  if (!currentPassword) {
+    issues.push(
+      issue("currentPassword", t("auth.updatePassword.currentPasswordRequired"))
+    );
+  }
+
+  issues.concat(checkPassword(newPassword));
+
+  const hasPreValidationErrors = addIssuesToRequest(req, issues);
+  if (hasPreValidationErrors) return next();
 
   try {
-    await changeUserPassword({
+    const { userObject, issues: postIssues } = await changeUserPassword({
       userId: user._id,
       currentPassword,
       newPassword,
     });
 
-    res.status(200).json({ message: "Password changed successfully" });
+    addIssuesToRequest(req, postIssues);
+
+    next();
   } catch (err: any) {
     next(new BadRequestError(err.message || "Failed to change password"));
   }
@@ -294,9 +296,12 @@ const changePassword = async (
  * Returns authentication status.
  * - Indicates whether `req.user` is populated by the JWT strategy.
  */
-const checkAuthStatus = async (req: Request, res: Response): Promise<void> => {
-  const isLoggedIn = Boolean(req.user);
-  res.status(200).json({ authenticated: isLoggedIn });
+const checkAuthStatus = async (
+  _: Request,
+  __: Response,
+  next: NextFunction
+): Promise<void> => {
+  next();
 };
 
 export {

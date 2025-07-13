@@ -30,6 +30,16 @@ function loadConfig(): EnvConfig {
     cookieName: process.env.COOKIE_NAME || "token",
     cookieExpirationMinutes: parseNumberEnv("COOKIE_EXPIRATION_MINUTES") || 60,
 
+    // Password settings
+    passwordMinLength: parseNumberEnv("PASSWORD_MIN_LENGTH", 4),
+    passwordMaxLength: parseNumberEnv("PASSWORD_MAX_LENGTH", 64),
+    passwordRequireUppercase: isTrue(process.env.PASSWORD_REQUIRE_UPPERCASE),
+    passwordRequireLowercase: isTrue(process.env.PASSWORD_REQUIRE_LOWERCASE),
+    passwordRequireNumbers: isTrue(process.env.PASSWORD_REQUIRE_NUMBERS),
+    passwordRequireSpecialChars: isTrue(
+      process.env.PASSWORD_REQUIRE_SPECIAL_CHARS
+    ),
+
     // Password reset settings
     passwordResetWindowMinutes: parseNumberEnv("PASSWORD_RESET_WINDOW_MINUTES"),
     passwordResetRateLimit: parseNumberEnv("PASSWORD_RESET_RATE_LIMIT"),

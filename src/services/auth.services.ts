@@ -3,6 +3,7 @@ import { BadRequestError, getGlobalT, loadConfig, resolveT } from "../lib";
 import { ErrorCodes } from "../lib/constants";
 import { minutesToSeconds } from "../lib/utils";
 import {
+  ChangePasswordResult,
   LoginUserInput,
   LoginUserResult,
   RegisterUserInput,
@@ -18,7 +19,7 @@ import {
 } from "./user.services";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { issue } from "../lib/errors";
+import { FieldIssue, issue } from "../lib/errors";
 
 /**
  * Registers a new user in the system.
@@ -145,25 +146,44 @@ const changeUserPassword = async ({
   userId: string;
   currentPassword: string;
   newPassword: string;
-}): Promise<void> => {
+}): Promise<ChangePasswordResult> => {
+  const t = getGlobalT();
+  const issues: FieldIssue[] = [];
+  let continueProcess = true;
+
   const existingUser = await findUserById(userId);
   if (!existingUser || !existingUser.password) {
-    throw new BadRequestError("User not found", ErrorCodes.USER_NOT_FOUND);
+    issues.push(issue(t("user"), t("notFound", { field: t("user") })));
+    continueProcess = false;
   }
 
   // Validate current password
-  const isMatch = await bcrypt.compare(currentPassword, existingUser.password);
-  if (!isMatch) {
-    throw new BadRequestError(
-      "Incorrect current password",
-      ErrorCodes.INVALID_CREDENTIALS
+  if (existingUser && continueProcess) {
+    const isMatch = await bcrypt.compare(
+      currentPassword,
+      existingUser.password
     );
+    if (!isMatch) {
+      continueProcess = false;
+      issues.push(
+        issue(
+          t("currentPassword"),
+          t("incorrect", { field: t("currentPassword") })
+        )
+      );
+    }
   }
 
   // Hash and save the new password
-  const hashedNew = await bcrypt.hash(newPassword, 10);
-  existingUser.password = hashedNew;
-  await existingUser.save();
+  if (existingUser && continueProcess) {
+    const hashedNew = await bcrypt.hash(newPassword, 10);
+    existingUser.password = hashedNew;
+    await existingUser.save();
+  }
+  return {
+    userObject: existingUser,
+    issues: issues,
+  };
 };
 
 /**
