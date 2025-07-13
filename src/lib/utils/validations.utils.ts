@@ -1,4 +1,4 @@
-import { TFunction } from "i18next";
+import { getFixedT, TFunction } from "i18next";
 import { loadConfig } from "../config";
 
 import { FieldIssue, FieldIssueType, issue } from "../errors";
@@ -7,20 +7,25 @@ import validator from "validator";
 const checkUsername = (username: string, t?: TFunction): FieldIssue[] => {
   const config = loadConfig();
 
-  console.log(t!("test"));
+  t = t || getFixedT("en");
 
   const issues: FieldIssue[] = [];
   if (config.userUsernameRequired) {
     if (!username) {
-      issues.push(issue("username", "Username is required"));
+      issues.push(
+        issue(t("username"), t("required", { field: t("username") }))
+      );
     }
 
     if (username && config.userUsernameMinLength) {
       if (username.length < config.userUsernameMinLength) {
         issues.push(
           issue(
-            "username",
-            `Username must be at least ${config.userUsernameMinLength} characters long`
+            t("username"),
+            t("minLength", {
+              field: t("username"),
+              min: config.userUsernameMinLength,
+            })
           )
         );
       }
@@ -32,8 +37,11 @@ const checkUsername = (username: string, t?: TFunction): FieldIssue[] => {
       ) {
         issues.push(
           issue(
-            "username",
-            `Username must be less than ${config.userUsernameMaxLength} characters long`
+            t("username"),
+            t("maxLength", {
+              field: t("username"),
+              min: config.userUsernameMaxLength,
+            })
           )
         );
       }

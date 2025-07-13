@@ -1,15 +1,12 @@
 {
-  "test": "Something",
+  "username": "Username",
+  "password": "Password",
+  "email": "Email",
+  "required": "{{field}} is required.",
+  "minLength": "{{field}}  must be at least {{min}} characters long.",
+  "maxLength": "{{field}}  must be at most {{max}} characters long.",
+
   "auth": {
-    "fields": {
-      "username": "Username",
-      "password": "Password",
-      "email": "Email"
-    },
-    "fieldValidations": {
-      "required": "{{field}} is required.",
-      "minLength": "{{field}}  must be at least {{min}} characters long.",
-      "maxLength": "{{field}}  must be at most {{max}} characters long."
-    }
+    "fieldValidations": {}
   }
 }
