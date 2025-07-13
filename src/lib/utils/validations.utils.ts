@@ -3,11 +3,11 @@ import { loadConfig } from "../config";
 
 import { FieldIssue, FieldIssueType, issue } from "../errors";
 import validator from "validator";
+import { getGlobalT } from "../i18Next";
 
-const checkUsername = (username: string, t?: TFunction): FieldIssue[] => {
+const checkUsername = (username: string): FieldIssue[] => {
   const config = loadConfig();
-
-  t = t || getFixedT("en");
+  const t = getGlobalT();
 
   const issues: FieldIssue[] = [];
   if (config.userUsernameRequired) {
@@ -53,13 +53,14 @@ const checkUsername = (username: string, t?: TFunction): FieldIssue[] => {
 const checkEmail = (email: string): FieldIssue[] => {
   const config = loadConfig();
   const issues: FieldIssue[] = [];
+  const t = getGlobalT();
 
   if (config.userEmailRequired) {
     if (!email) {
-      issues.push(issue("email", "Email is required"));
+      issues.push(issue(t("email"), t("required", { field: t("email") })));
     }
     if (email && !validator.isEmail(email)) {
-      issues.push(issue("email", `Invalid email format ${email}`));
+      issues.push(issue(t("email"), t("invalid", { field: t("email") })));
     }
   }
 
@@ -69,9 +70,10 @@ const checkEmail = (email: string): FieldIssue[] => {
 const checkAuthConfiguration = (): FieldIssue[] => {
   const config = loadConfig();
   const issues: FieldIssue[] = [];
+  const t = getGlobalT();
 
   if (!config.backendJwtSecretKey) {
-    issues.push(issue("Jwt_Key", "JWT secret key is required. Contact admin."));
+    issues.push(issue("Jwt_Key", t("system.config.jwtRequired")));
   }
 
   if (
@@ -79,25 +81,25 @@ const checkAuthConfiguration = (): FieldIssue[] => {
     config.backendJwtSecretKey.trim().length < 16
   ) {
     issues.push(
-      issue("Jwt_Key", "JWT secret key is too short", FieldIssueType.warning)
+      issue("Jwt_Key", t("system.config.jwtTooShort"), FieldIssueType.warning)
     );
   }
 
   if (!config.cookieExpirationMinutes) {
     issues.push(
-      issue("Cookie_Expiration", "Cookie expiration time is not set")
+      issue("Cookie_Expiration", t("system.config.cookieExpirationNotSet"))
     );
   }
 
   if (!config.cookieName) {
-    issues.push(issue("Cookie_Name", "Cookie name is not set"));
+    issues.push(issue("Cookie_Name", t("system.config.cookieNameNotSet")));
   }
 
   if (!config.userEmailRequired && !config.userUsernameRequired) {
     issues.push(
       issue(
         "Registration_Configuration",
-        "At least one of email or username must be required for registration"
+        t("system.config.emailOrUsernameRequired")
       )
     );
   }

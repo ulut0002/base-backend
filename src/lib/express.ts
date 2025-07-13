@@ -7,7 +7,12 @@ import helmet from "helmet";
 import morgan from "morgan";
 import passport from "passport";
 import multer from "multer";
-import { ensureBody, generalLimiter, i18nMiddleware } from "../middleware";
+import {
+  attachGlobalT,
+  ensureBody,
+  generalLimiter,
+  i18nMiddleware,
+} from "../middleware";
 import { getBackendUrl } from "../lib";
 import { loadLocale } from "../i18n/i18n-util.sync";
 
@@ -54,6 +59,7 @@ const configureApp = (app: express.Express) => {
   // // Internationalization
   // // -------------------------
   app.use(i18nMiddleware);
+  app.use(attachGlobalT);
 
   // -------------------------
   // Authentication

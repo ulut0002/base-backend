@@ -2,6 +2,7 @@
 
 import { FieldIssue } from "../lib";
 import { TypeOrNull } from "./generic.types";
+import { UserDocument } from "./user.types";
 
 interface RegisterUserInput {
   username: string;
@@ -28,6 +29,12 @@ interface LoginUserResult {
   userObject?: any;
   issues?: FieldIssue[];
 }
+
+type MeResponse = {
+  user: SafeUser;
+};
+
+type SafeUser = Pick<UserDocument, "_id" | "username" | "email">;
 
 type VerificationCodeType =
   | "PASSWORD_RESET"
@@ -56,5 +63,6 @@ export type {
   LoginUserResult,
   VerificationCodeType,
   VerificationCodeStatus,
+  MeResponse,
   SessionData,
 };

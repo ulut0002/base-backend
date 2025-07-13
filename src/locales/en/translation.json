@@ -2,11 +2,28 @@
   "username": "Username",
   "password": "Password",
   "email": "Email",
+  "user": "User",
   "required": "{{field}} is required.",
+  "invalid": "{{field}} is invalid. ",
+  "incorrect": "{{field}} is incorrect.",
+  "notFound": "{{field}} not found.",
   "minLength": "{{field}}  must be at least {{min}} characters long.",
   "maxLength": "{{field}}  must be at most {{max}} characters long.",
 
   "auth": {
-    "fieldValidations": {}
+    "passwordWrong": "Password is incorrect.",
+    "register": {
+      "userExists": "User already exists.",
+      "userPasswordNotFound": "User password not found."
+    }
+  },
+  "system": {
+    "config": {
+      "jwtRequired": "JWT secret key is required.",
+      "jwtTooShort": "JWT token is too short.",
+      "cookieExpirationNotSet": "Cookie expiration is not set.",
+      "cookieNameNotSet": "Cookie name is not set.",
+      "emailOrUsernameRequired": "At least one of email or username must be required for registration"
+    }
   }
 }

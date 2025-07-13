@@ -14,6 +14,7 @@ import {
   VerificationCodeStatus,
   UserRole,
   SessionData,
+  MeResponse,
 } from "./auth.types";
 
 import { EnvConfig } from "./config.types";
@@ -44,6 +45,7 @@ export type {
   VerificationCodeType,
   VerificationCodeStatus,
   SessionData,
+  MeResponse,
 };
 
 export { UserRole };

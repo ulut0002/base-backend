@@ -11,12 +11,12 @@ import {
 import { StrategyOptions, Strategy as JwtStrategy } from "passport-jwt";
 import { PassportStatic } from "passport";
 import {
-  ApiError,
   BadRequestError,
   createErrorIf,
   FieldIssue,
   issue,
   loadConfig,
+  resolveT,
 } from "../lib";
 import { ErrorCodes } from "../lib/constants";
 import {
@@ -95,8 +95,9 @@ const register = async (
   const username = envConfig.userUsernameRequired ? rawUsername : email;
 
   // Pre-registration validation (e.g., format, presence, config checks)
+  const t = resolveT(req);
   const issues: FieldIssue[] = [
-    ...checkUsername(username, req.t),
+    ...checkUsername(username),
     ...checkEmail(email),
     ...checkAuthConfiguration(),
   ];
@@ -147,6 +148,7 @@ const login = async (
   // Load app configuration (JWT secret, email normalization, etc.)
   const envConfig = loadConfig();
   const jwtSecretKey = envConfig.backendJwtSecretKey || "";
+  const t = resolveT(req);
 
   const rawUsernameOrEmail = req.body.username?.trim() || null;
   const rawPassword = req.body.password || null;
@@ -194,25 +196,20 @@ const login = async (
  * Logs out the user.
  * - Clears the JWT cookie from the browser.
  */
-const logout = (req: Request, res: Response): void => {
-  const config = loadConfig();
-  if (config.cookieName) {
-    res.clearCookie(config.cookieName);
-  }
-  res.status(200).json({ message: "Logged out successfully." });
+const logout = (_: Request, __: Response, next: NextFunction): void => {
+  next();
 };
 
 /**
  * Returns the currently authenticated user.
  * Assumes passport middleware has attached `req.user`.
  */
-const me = async (req: Request, res: Response): Promise<void> => {
-  const user = req.user;
-  if (!user) throw new BadRequestError(ErrorCodes.UNAUTHORIZED);
-
-  // Strip password before returning user object
-  const { password, ...safeUser } = (user as any).toObject();
-  res.json({ user: safeUser });
+const me = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  next();
 };
 
 /**

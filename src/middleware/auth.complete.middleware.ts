@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { BadRequestError, loadConfig, logger } from "../lib";
 import { minutesToMilliseconds } from "../lib/utils";
 import { log } from "console";
+import { ErrorCodes } from "../lib/constants";
+import { MeResponse, UserDocument } from "../types";
 
 const registerComplete = (req: Request, res: Response, next: NextFunction) => {
   const envConfig = loadConfig();
@@ -51,4 +53,21 @@ const loginComplete = (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
-export { registerComplete, loginComplete };
+const meComplete = (req: Request, res: Response<MeResponse>) => {
+  const user = req.user;
+  if (!user) throw new BadRequestError(ErrorCodes.UNAUTHORIZED);
+
+  const { _id, username, email } = (user as UserDocument).toObject();
+
+  res.json({ user: { _id, username, email } });
+};
+
+const logoutComplete = (req: Request, res: Response, next: NextFunction) => {
+  const config = loadConfig();
+  if (config.cookieName) {
+    res.clearCookie(config.cookieName);
+  }
+  res.status(200).json({ message: "Logged out successfully." });
+};
+
+export { registerComplete, loginComplete, meComplete, logoutComplete };

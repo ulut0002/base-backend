@@ -1,5 +1,5 @@
 import normalizeEmail from "normalize-email";
-import { BadRequestError, loadConfig } from "../lib";
+import { BadRequestError, getGlobalT, loadConfig, resolveT } from "../lib";
 import { ErrorCodes } from "../lib/constants";
 import { minutesToSeconds } from "../lib/utils";
 import {
@@ -36,6 +36,7 @@ const registerUser = async ({
 }: RegisterUserInput): Promise<RegisterUserResult> => {
   const envConfig = loadConfig();
   const normalizedEmail = normalizeEmail(email);
+  const t = getGlobalT();
 
   // Check if a user already exists with the same username or email
   let existingUser = await findExistingUserByUsernameOrEmail({
@@ -48,7 +49,7 @@ const registerUser = async ({
     return {
       token: null,
       userObject: null,
-      issues: [issue("user", "User already exists")],
+      issues: [issue(t("user"), t("auth.register.userExists"))],
     };
   }
 
@@ -83,6 +84,7 @@ const loginUser = async ({
   jwtSecretKey,
 }: LoginUserInput): Promise<LoginUserResult> => {
   const envConfig = loadConfig();
+  const t = getGlobalT();
 
   // Try to find the user using raw input
   let user = await findExistingUserByUsernameOrEmail({ usernameOrEmail });
@@ -100,7 +102,7 @@ const loginUser = async ({
     return {
       token: null,
       userObject: null,
-      issues: [issue("user", "User not found")],
+      issues: [issue(t("user"), t("notFound", { field: t("user") }))],
     };
   }
 
@@ -108,7 +110,7 @@ const loginUser = async ({
     return {
       token: null,
       userObject: null,
-      issues: [issue("user", "User password not found")],
+      issues: [issue(t("user"), t("auth.register.userPasswordNotFound"))],
     };
   }
 
@@ -118,7 +120,7 @@ const loginUser = async ({
     return {
       token: null,
       userObject: null,
-      issues: [issue("password", "Invalid credentials")],
+      issues: [issue(t("password"), t("incorrect", { field: t("password") }))],
     };
   }
 

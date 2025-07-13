@@ -2,6 +2,8 @@ import i18next from "i18next";
 import Backend from "i18next-fs-backend";
 import i18nextMiddleware from "i18next-express-middleware";
 import path from "path";
+import { NextFunction, Request, Response } from "express";
+import { setGlobalT } from "../lib";
 
 export async function initializeI18n(): Promise<void> {
   try {
@@ -22,7 +24,7 @@ export async function initializeI18n(): Promise<void> {
             "../src/locales/{{lng}}/translation.json"
           ),
         },
-        debug: true,
+        debug: false,
         detection: {
           order: ["querystring", "cookie", "header"],
           lookupQuerystring: "lng",
@@ -35,6 +37,13 @@ export async function initializeI18n(): Promise<void> {
     console.error("Failed to initialize i18next", error);
     throw error;
   }
+}
+
+export function attachGlobalT(req: Request, res: Response, next: NextFunction) {
+  if (req.t) {
+    setGlobalT(req.t);
+  }
+  next();
 }
 
 export const i18nMiddleware = i18nextMiddleware.handle(i18next);

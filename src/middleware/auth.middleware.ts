@@ -32,7 +32,12 @@ import {
   statusPost2,
 } from "./auth.post.middleware";
 import { AuthMiddlewareMap } from "../types";
-import { loginComplete, registerComplete } from "./auth.complete.middleware";
+import {
+  loginComplete,
+  logoutComplete,
+  meComplete,
+  registerComplete,
+} from "./auth.complete.middleware";
 
 // Pre-middlewares (before controller logic)
 export const preAuthMiddleware: AuthMiddlewareMap = {
@@ -59,8 +64,8 @@ export const postAuthMiddleware: AuthMiddlewareMap = {
 export const completeAuthMiddleware: AuthMiddlewareMap = {
   login: [loginComplete],
   register: [registerComplete],
-  me: [],
-  logout: [],
+  me: [meComplete],
+  logout: [logoutComplete],
   changePassword: [],
   refreshToken: [],
   status: [],

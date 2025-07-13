@@ -35,19 +35,21 @@ authRouter.post(
   ...completeAuthMiddleware.login
 );
 
+authRouter.post(
+  "/logout",
+  ...preAuthMiddleware.logout,
+  logout,
+  ...postAuthMiddleware.logout,
+  ...completeAuthMiddleware.logout
+);
+
 authRouter.get(
   "/me",
   passport.authenticate("jwt", { session: false }),
   ...preAuthMiddleware.me,
   me,
-  ...postAuthMiddleware.me
-);
-
-authRouter.post(
-  "/logout",
-  ...preAuthMiddleware.logout,
-  logout,
-  ...postAuthMiddleware.logout
+  ...postAuthMiddleware.me,
+  ...completeAuthMiddleware.me
 );
 
 authRouter.post(
