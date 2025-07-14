@@ -132,8 +132,20 @@ const register = async (
     // Pass control to next response handler
     next();
   } catch (err: any) {
-    // Unexpected failure (e.g., DB error, hashing error)
-    next(new BadRequestError(err.message || "Registration failed"));
+    const issues: FieldIssue[] = [];
+    const message = t("auth.register.userRegistrationFailed");
+    issues.push(issue(t("registration"), message));
+    if (err.message) {
+      issues.push(
+        issue(
+          t("registration"),
+          t("errorDescription", { message, error: err.message })
+        )
+      );
+    }
+    addIssuesToRequest(req, issues);
+
+    next(new BadRequestError(err.message || message));
   }
 };
 /**
@@ -161,10 +173,10 @@ const login = async (
 
   // Validate inputs
   if (!username) {
-    issues.push(issue("username", "Username is required"));
+    issues.push(issue(t("username"), t("required", { field: t("username") })));
   }
   if (!password) {
-    issues.push(issue("password", "Password is required"));
+    issues.push(issue(t("password"), t("required", { field: t("password") })));
   }
   issues = [...issues, ...checkAuthConfiguration()];
 

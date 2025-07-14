@@ -1,4 +1,5 @@
 {
+  "errorDescription": "Error: {{message}}",
   "username": "Username",
   "password": "Password",
   "currentPassword": "Current Password",
@@ -11,13 +12,15 @@
   "notFound": "{{field}} not found.",
   "minLength": "{{field}}  must be at least {{min}} characters long.",
   "maxLength": "{{field}}  must be at most {{max}} characters long.",
+  "registration": "Registration",
 
   "auth": {
     "passwordWrong": "Password is incorrect.",
     "register": {
       "userExists": "User already exists.",
       "userPasswordNotFound": "User password not found.",
-      "userCreationFailed": "User creation failed."
+      "userCreationFailed": "User creation failed.",
+      "userRegistrationFailed": "User registration failed."
     },
     "updatePassword": {
       "passwordMissingUppercase": "Password must contain at least one uppercase letter.",
