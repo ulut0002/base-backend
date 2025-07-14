@@ -58,19 +58,35 @@ const registerUser = async ({
   const hashedPassword = await bcrypt.hash(password, 10);
 
   // Create the user
-  const newUser = await createLocalUser({
-    username,
-    email,
-    normalizedEmail: normalizedEmail!,
-    password: hashedPassword,
-  });
 
-  // Sign a JWT token with session payload
-  const token = jwt.sign(createSessionObject(newUser), jwtSecretKey, {
-    expiresIn: minutesToSeconds(envConfig.cookieExpirationMinutes!),
-  });
+  try {
+    const newUser = await createLocalUser({
+      username,
+      email,
+      normalizedEmail: normalizedEmail!,
+      password: hashedPassword,
+    });
 
-  return { token, userObject: newUser, issues: [] };
+    if (!newUser) {
+      return {
+        token: null,
+        userObject: null,
+        issues: [issue(t("user"), t("auth.register.userCreationFailed"))],
+      };
+    }
+
+    // Sign a JWT token with session payload
+    const token = jwt.sign(createSessionObject(newUser), jwtSecretKey, {
+      expiresIn: minutesToSeconds(envConfig.cookieExpirationMinutes!),
+    });
+    return { token, userObject: newUser, issues: [] };
+  } catch (error) {
+    return {
+      token: null,
+      userObject: null,
+      issues: [issue(t("user"), t("auth.register.userCreationFailed"))],
+    };
+  }
 };
 
 /**

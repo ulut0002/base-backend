@@ -100,6 +100,7 @@ const register = async (
   const issues: FieldIssue[] = [
     ...checkUsername(username),
     ...checkEmail(email),
+    ...checkPassword(password),
     ...checkAuthConfiguration(),
   ];
 

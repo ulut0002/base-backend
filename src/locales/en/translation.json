@@ -16,7 +16,8 @@
     "passwordWrong": "Password is incorrect.",
     "register": {
       "userExists": "User already exists.",
-      "userPasswordNotFound": "User password not found."
+      "userPasswordNotFound": "User password not found.",
+      "userCreationFailed": "User creation failed."
     },
     "updatePassword": {
       "passwordMissingUppercase": "Password must contain at least one uppercase letter.",
