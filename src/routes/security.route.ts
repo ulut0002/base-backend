@@ -30,23 +30,4 @@ securityRouter.post(
   ...postSecurityMiddleware.postLogoutOthers
 );
 
-securityRouter.post(
-  "/enable-2fa",
-  ...preSecurityMiddleware.postEnable2FA,
-  postEnable2FA,
-  ...postSecurityMiddleware.postEnable2FA
-);
-securityRouter.post(
-  "/disable-2fa",
-  ...preSecurityMiddleware.postDisable2FA,
-  postDisable2FA,
-  ...postSecurityMiddleware.postDisable2FA
-);
-securityRouter.post(
-  "/verify-2fa",
-  ...preSecurityMiddleware.postVerify2FA,
-  postVerify2FA,
-  ...postSecurityMiddleware.postVerify2FA
-);
-
 export { securityRouter };
