@@ -54,85 +54,24 @@ const createErrorResponse = ({
   };
 };
 
-enum FieldIssueType {
+enum IssueType {
   error = "error",
   warning = "warning",
   message = "info",
 }
 
 type Issue = {
-  type?: FieldIssueType;
+  type?: IssueType;
   code?: ErrorCodes;
   errorType?: ApiError;
   messages?: Record<string, string | number | boolean | null | undefined>; // key = field name, value = message
-};
-
-/**
- * Represents a single validation error.
- * 'field' is optional to allow general errors.
- */
-type FieldIssue = {
-  type?: FieldIssueType;
-  code?: ErrorCodes;
-  field?: string;
-  message?: string;
-  errorType?: ApiError;
-};
-
-const messageCollector = () => {
-  const errors: FieldIssue[] = [];
-  const warnings: FieldIssue[] = [];
-  const infos: FieldIssue[] = [];
-
-  const createAdder =
-    (targetList: FieldIssue[], type: FieldIssueType) =>
-    (field: string, condition?: any, message?: string): void => {
-      if (typeof condition !== "undefined") {
-        if (!condition) {
-          targetList.push({
-            type,
-            field: field,
-            message: message,
-          });
-        }
-      } else {
-        // General/global issue
-        targetList.push({
-          type,
-          message: field,
-        });
-      }
-    };
-
-  const addError = createAdder(errors, FieldIssueType.error);
-  const addWarning = createAdder(warnings, FieldIssueType.warning);
-  const addInfo = createAdder(infos, FieldIssueType.message);
-
-  const hasErrors = () => errors.length > 0;
-  const getErrors = () => errors;
-  const hasWarnings = () => warnings.length > 0;
-  const getWarnings = () => warnings;
-  const hasInfos = () => infos.length > 0;
-  const getInfos = () => infos;
-
-  return {
-    addError,
-    addWarning,
-    addInfo,
-    hasErrors,
-    getErrors,
-    hasWarnings,
-    getWarnings,
-    hasInfos,
-    getInfos,
-  };
 };
 
 class ApiError extends Error {
   status: number;
   name: string;
   internalCode?: string;
-  fieldIssues: FieldIssue[] = [];
+  fieldIssues: Issue[] = [];
 
   constructor(message: string, status = HTTP_STATUS.INTERNAL_SERVER_ERROR) {
     super(message);
@@ -143,7 +82,7 @@ class ApiError extends Error {
     Object.setPrototypeOf(this, new.target.prototype); // Restore prototype chain
   }
 
-  withIssues(issues: FieldIssue[]): this {
+  withIssues(issues: Issue[]): this {
     this.fieldIssues = [...this.fieldIssues, ...issues];
     return this;
   }
@@ -200,15 +139,9 @@ const errorHandler = (
 ): void => {
   if (error instanceof ApiError) {
     const issues = error.fieldIssues || [];
-    const errors = issues.filter(
-      (issue) => issue.type === FieldIssueType.error
-    );
-    const warnings = issues.filter(
-      (issue) => issue.type === FieldIssueType.warning
-    );
-    const messages = issues.filter(
-      (issue) => issue.type === FieldIssueType.message
-    );
+    const errors = issues.filter((issue) => issue.type === IssueType.error);
+    const warnings = issues.filter((issue) => issue.type === IssueType.warning);
+    const messages = issues.filter((issue) => issue.type === IssueType.message);
 
     res.status(error.status).json({
       name: error.name || "API_ERROR",
@@ -248,30 +181,19 @@ const createErrorIf = <T extends ApiError>({
   }
 };
 
-const issue = (
-  field: string,
-  message: string,
-  type?: FieldIssueType
-): FieldIssue => ({
-  type: type || FieldIssueType.error,
-  field,
-  message,
-});
-
 type CreateIssueParams = {
   code?: ErrorCodes;
   messages?: Record<string, string | number | boolean | null | undefined>;
-  type?: FieldIssueType;
+  type?: IssueType;
 };
 
 const createIssue = (params: CreateIssueParams): Issue => ({
-  type: params.type || FieldIssueType.error,
+  type: params.type || IssueType.error,
   code: params.code,
   messages: params.messages,
 });
 
 export {
-  messageCollector,
   createErrorResponse,
   errorHandler,
   ApiError,
@@ -280,9 +202,8 @@ export {
   UnauthorizedError,
   ForbiddenError,
   createErrorIf,
-  FieldIssueType,
-  issue,
+  IssueType,
   createIssue,
 };
 
-export type { FieldIssue, Issue, CreateIssueParams };
+export type { Issue, CreateIssueParams };

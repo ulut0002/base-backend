@@ -1,5 +1,5 @@
 import normalizeEmail from "normalize-email";
-import { BadRequestError, getGlobalT, loadConfig, resolveT } from "../lib";
+import { getGlobalT, loadConfig } from "../lib";
 import { ErrorCodes } from "../lib/constants";
 import { minutesToSeconds } from "../lib/utils";
 import {
@@ -19,7 +19,7 @@ import {
 } from "./user.services";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { FieldIssue, issue } from "../lib/errors";
+import { Issue, createIssue } from "../lib/errors";
 
 /**
  * Registers a new user in the system.
@@ -50,7 +50,11 @@ const registerUser = async ({
     return {
       token: null,
       userObject: null,
-      issues: [issue(t("user"), t("auth.register.userExists"))],
+      issues: [
+        createIssue({
+          code: ErrorCodes.USER_ALREADY_EXISTS,
+        }),
+      ],
     };
   }
 
@@ -71,7 +75,11 @@ const registerUser = async ({
       return {
         token: null,
         userObject: null,
-        issues: [issue(t("user"), t("auth.register.userCreationFailed"))],
+        issues: [
+          createIssue({
+            code: ErrorCodes.REGISTRATION_FAILED,
+          }),
+        ],
       };
     }
 
@@ -84,7 +92,11 @@ const registerUser = async ({
     return {
       token: null,
       userObject: null,
-      issues: [issue(t("user"), t("auth.register.userCreationFailed"))],
+      issues: [
+        createIssue({
+          code: ErrorCodes.REGISTRATION_FAILED,
+        }),
+      ],
     };
   }
 };
@@ -119,7 +131,14 @@ const loginUser = async ({
     return {
       token: null,
       userObject: null,
-      issues: [issue(t("user"), t("notFound", { field: t("user") }))],
+      issues: [
+        createIssue({
+          code: ErrorCodes.USER_NOT_FOUND,
+          messages: {
+            username: usernameOrEmail,
+          },
+        }),
+      ],
     };
   }
 
@@ -127,7 +146,7 @@ const loginUser = async ({
     return {
       token: null,
       userObject: null,
-      issues: [issue(t("user"), t("auth.register.userPasswordNotFound"))],
+      issues: [createIssue({ code: ErrorCodes.USER_MISSING_PASSWORD })],
     };
   }
 
@@ -137,7 +156,7 @@ const loginUser = async ({
     return {
       token: null,
       userObject: null,
-      issues: [issue(t("password"), t("incorrect", { field: t("password") }))],
+      issues: [createIssue({ code: ErrorCodes.INVALID_CREDENTIALS })],
     };
   }
 
@@ -164,12 +183,12 @@ const changeUserPassword = async ({
   newPassword: string;
 }): Promise<ChangePasswordResult> => {
   const t = getGlobalT();
-  const issues: FieldIssue[] = [];
+  const issues: Issue[] = [];
   let continueProcess = true;
 
   const existingUser = await findUserById(userId);
   if (!existingUser || !existingUser.password) {
-    issues.push(issue(t("user"), t("notFound", { field: t("user") })));
+    issues.push(createIssue({ code: ErrorCodes.USER_NOT_FOUND }));
     continueProcess = false;
   }
 
@@ -182,10 +201,9 @@ const changeUserPassword = async ({
     if (!isMatch) {
       continueProcess = false;
       issues.push(
-        issue(
-          t("currentPassword"),
-          t("incorrect", { field: t("currentPassword") })
-        )
+        createIssue({
+          code: ErrorCodes.INVALID_CREDENTIALS,
+        })
       );
     }
   }

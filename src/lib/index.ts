@@ -2,7 +2,6 @@ import { getBackendUrl, loadConfig } from "./config";
 import { connectToDatabase, disconnectFromDatabase } from "./db";
 import {
   createErrorResponse,
-  messageCollector,
   errorHandler,
   ApiError,
   NotFoundError,
@@ -10,27 +9,17 @@ import {
   UnauthorizedError,
   ForbiddenError,
   createErrorIf,
-  FieldIssue,
-  FieldIssueType,
-  issue,
+  IssueType,
   Issue,
   createIssue,
   CreateIssueParams,
 } from "./errors";
 import { configureApp } from "./express";
-import {
-  parseAcceptLanguage,
-  resolveT,
-  setGlobalT,
-  getGlobalT,
-} from "./i18Next";
+import { parseAcceptLanguage, setGlobalT, getGlobalT } from "./i18Next";
 import { logger } from "./logger";
 import { getMailProfile, getMailProfiles, setMailProfiles } from "./mailConfig";
 
-export {
-  messageCollector as createValidationErrorCollector,
-  createErrorResponse,
-};
+export { createErrorResponse };
 export {
   loadConfig,
   getBackendUrl,
@@ -41,7 +30,6 @@ export {
   UnauthorizedError,
   ForbiddenError,
   createErrorIf,
-  issue,
   CreateIssueParams,
   createIssue,
 };
@@ -50,6 +38,6 @@ export { logger };
 export { connectToDatabase, disconnectFromDatabase };
 export { configureApp };
 export { setMailProfiles, getMailProfiles, getMailProfile };
-export type { FieldIssue, Issue };
-export { FieldIssueType };
-export { parseAcceptLanguage, resolveT, setGlobalT, getGlobalT };
+export type { Issue };
+export { IssueType };
+export { parseAcceptLanguage, setGlobalT, getGlobalT };

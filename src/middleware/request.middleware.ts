@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { UserRole } from "../types";
-import { FieldIssue, FieldIssueType, parseAcceptLanguage } from "../lib";
+import { Issue, IssueType, parseAcceptLanguage } from "../lib";
 
 /**
  * Middleware to ensure that `req.body` is always defined and an object.
@@ -10,22 +10,22 @@ const ensureBody = (req: Request, _res: Response, next: NextFunction) => {
     (req as any).body = {};
   }
 
-  const errors: FieldIssue[] = [];
-  const warnings: FieldIssue[] = [];
-  const messages: FieldIssue[] = [];
+  const errors: Issue[] = [];
+  const warnings: Issue[] = [];
+  const messages: Issue[] = [];
 
   req.xMeta = {
     errors: [],
     warnings: [],
     messages: [],
-    addIssue(issue: FieldIssue, issueType: FieldIssueType) {
-      if (issueType === FieldIssueType.error) {
+    addIssue(issue: Issue, issueType: IssueType) {
+      if (issueType === IssueType.error) {
         errors.push(issue);
       }
-      if (issueType === FieldIssueType.warning) {
+      if (issueType === IssueType.warning) {
         warnings.push(issue);
       }
-      if (issueType === FieldIssueType.message) {
+      if (issueType === IssueType.message) {
         messages.push(issue);
       }
     },

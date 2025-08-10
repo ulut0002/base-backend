@@ -1,6 +1,6 @@
 import { loadConfig } from "../config";
 
-import { createIssue, FieldIssueType, Issue } from "../errors";
+import { createIssue, IssueType, Issue } from "../errors";
 import validator from "validator";
 import { ErrorCodes } from "../constants";
 
@@ -181,7 +181,7 @@ const checkAuthConfiguration = (): Issue[] => {
     issues.push(
       createIssue({
         code: ErrorCodes.JWT_SECRET_TOO_SHORT,
-        type: FieldIssueType.warning,
+        type: IssueType.warning,
         messages: {
           minLength: 16,
           currentLength: config.backendJwtSecretKey.trim().length,

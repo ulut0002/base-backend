@@ -31,7 +31,3 @@ export function parseAcceptLanguage(header: string | undefined): string {
 
   return "en"; // default fallback
 }
-
-export function resolveT(req: Request): TFunction {
-  return req.t || getFixedT("en");
-}

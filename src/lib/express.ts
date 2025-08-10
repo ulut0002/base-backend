@@ -7,14 +7,8 @@ import helmet from "helmet";
 import morgan from "morgan";
 import passport from "passport";
 import multer from "multer";
-import {
-  attachGlobalT,
-  ensureBody,
-  generalLimiter,
-  i18nMiddleware,
-} from "../middleware";
+import { ensureBody, generalLimiter } from "../middleware";
 import { getBackendUrl } from "../lib";
-import { loadLocale } from "../i18n/i18n-util.sync";
 
 /**
  * Applies global middleware configuration to the Express app.
@@ -54,12 +48,6 @@ const configureApp = (app: express.Express) => {
   app.use(compression()); // Enables gzip compression for responses
   app.use(cookieParser()); // Parses cookies from incoming requests
   app.use(bodyParser.json()); // Parses JSON bodies
-
-  // // -------------------------
-  // // Internationalization
-  // // -------------------------
-  app.use(i18nMiddleware);
-  app.use(attachGlobalT);
 
   // -------------------------
   // Authentication

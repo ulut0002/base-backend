@@ -1,5 +1,5 @@
 import "express";
-import { FieldIssue, FieldIssueType, Issue } from "../lib";
+import { Issue, IssueType } from "../lib";
 import { TypeOrNull } from "./generic.types";
 import { Request } from "express";
 import { TFunction } from "i18next";
@@ -7,10 +7,10 @@ import { TFunction } from "i18next";
 // Update src/middleware/request.middleware.ts as well
 
 interface RequestMetaData {
-  errors: FieldIssue[];
-  warnings: FieldIssue[];
-  messages: FieldIssue[];
-  addIssue: (issue: Issue, issueType: FieldIssueType) => void;
+  errors: Issue[];
+  warnings: Issue[];
+  messages: Issue[];
+  addIssue: (issue: Issue, issueType: IssueType) => void;
   hasErrors: () => boolean;
   hasWarnings: () => boolean;
   hasMessages: () => boolean;
@@ -18,13 +18,13 @@ interface RequestMetaData {
     errorLength: number;
     warningLength: number;
     messageLength: number;
-    errors: FieldIssue[];
-    warnings: FieldIssue[];
-    messages: FieldIssue[];
+    errors: Issue[];
+    warnings: Issue[];
+    messages: Issue[];
   };
-  getErrors: () => FieldIssue[];
-  getWarnings: () => FieldIssue[];
-  getMessages: () => FieldIssue[];
+  getErrors: () => Issue[];
+  getWarnings: () => Issue[];
+  getMessages: () => Issue[];
 }
 
 export interface RequestDataState {
@@ -56,8 +56,8 @@ export function addIssuesToRequest(
   let hasErrors = false;
 
   issues.forEach((issue) => {
-    req.xMeta?.addIssue(issue, issue.type ?? FieldIssueType.error);
-    if ((issue.type ?? FieldIssueType.error) === FieldIssueType.error) {
+    req.xMeta?.addIssue(issue, issue.type ?? IssueType.error);
+    if ((issue.type ?? IssueType.error) === IssueType.error) {
       hasErrors = true;
     }
   });

@@ -12,12 +12,10 @@ import { StrategyOptions, Strategy as JwtStrategy } from "passport-jwt";
 import { PassportStatic } from "passport";
 import {
   BadRequestError,
-  FieldIssue,
+  createIssue,
   getGlobalT,
   Issue,
-  issue,
   loadConfig,
-  resolveT,
 } from "../lib";
 import {
   checkEmail,
@@ -27,6 +25,7 @@ import {
 } from "../lib/utils";
 import normalizeEmail from "normalize-email";
 import { addIssuesToRequest } from "../types";
+import { ErrorCodes, MessageCodes } from "../lib/constants";
 
 /**
  * Configures Passport.js with JWT strategy.
@@ -96,7 +95,6 @@ const register = async (
   const username = envConfig.userUsernameRequired ? rawUsername : email;
 
   // Pre-registration validation (e.g., format, presence, config checks)
-  const t = resolveT(req);
   const issues: Issue[] = [
     ...checkUsername(username),
     ...checkEmail(email),
@@ -132,20 +130,16 @@ const register = async (
     // Pass control to next response handler
     next();
   } catch (err: any) {
-    const issues: FieldIssue[] = [];
-    const message = t("auth.register.userRegistrationFailed");
-    issues.push(issue(t("registration"), message));
-    if (err.message) {
-      issues.push(
-        issue(
-          t("registration"),
-          t("errorDescription", { message, error: err.message })
-        )
-      );
-    }
+    const issues: Issue[] = [];
+    issues.push(
+      createIssue({
+        code: ErrorCodes.REGISTRATION_FAILED,
+      })
+    );
+
     addIssuesToRequest(req, issues);
 
-    next(new BadRequestError(err.message || message));
+    next(new BadRequestError(err.message || "Registration failed"));
   }
 };
 /**
@@ -162,21 +156,28 @@ const login = async (
   // Load app configuration (JWT secret, email normalization, etc.)
   const envConfig = loadConfig();
   const jwtSecretKey = envConfig.backendJwtSecretKey || "";
-  const t = resolveT(req);
 
   const rawUsernameOrEmail = req.body.username?.trim() || null;
   const rawPassword = req.body.password || null;
 
   let { username, password } = req.body;
 
-  let issues: FieldIssue[] = [];
+  let issues: Issue[] = [];
 
   // Validate inputs
   if (!username) {
-    issues.push(issue(t("username"), t("required", { field: t("username") })));
+    issues.push(
+      createIssue({
+        code: ErrorCodes.MISSING_USERNAME,
+      })
+    );
   }
   if (!password) {
-    issues.push(issue(t("password"), t("required", { field: t("password") })));
+    issues.push(
+      createIssue({
+        code: ErrorCodes.MISSING_PASSWORD,
+      })
+    );
   }
   issues = [...issues, ...checkAuthConfiguration()];
 
@@ -276,12 +277,14 @@ const changePassword = async (
 ): Promise<void> => {
   const user = req.user as any;
   const { currentPassword, newPassword } = req.body;
-  const issues: FieldIssue[] = [];
+  const issues: Issue[] = [];
   const t = getGlobalT();
 
   if (!currentPassword) {
     issues.push(
-      issue("currentPassword", t("auth.updatePassword.currentPasswordRequired"))
+      createIssue({
+        code: ErrorCodes.MISSING_PASSWORD,
+      })
     );
   }
 

@@ -28,7 +28,6 @@ import {
 import { configureJwtStrategy } from "./controllers";
 import { createSocketServer } from "./lib/sockets";
 import { HTTP_STATUS, MessageCodes } from "./lib/constants";
-import { initializeI18n } from "./middleware/i18n";
 
 // -------------------------
 // Load Environment Variables and App Config
@@ -46,7 +45,6 @@ dotenv.config();
  * mounts routes, and starts listening for requests.
  */
 async function initializeApp(): Promise<void> {
-  await initializeI18n();
   logger.info("Initializing application...");
   dotenv.config();
   const config = loadConfig();
