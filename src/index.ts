@@ -27,7 +27,7 @@ import {
 
 import { configureJwtStrategy } from "./controllers";
 import { createSocketServer } from "./lib/sockets";
-import { HTTP_STATUS } from "./lib/constants";
+import { HTTP_STATUS, MessageCodes } from "./lib/constants";
 import { initializeI18n } from "./middleware/i18n";
 
 // -------------------------
@@ -79,8 +79,10 @@ async function initializeApp(): Promise<void> {
   app.use("/recovery", recoveryRouter);
   app.use("/docs", swaggerRoute);
 
-  app.use((req: Request, res: Response) => {
-    res.status(HTTP_STATUS.NOT_FOUND).json({ error: "Route not found" });
+  app.use((_: Request, res: Response) => {
+    res
+      .status(HTTP_STATUS.NOT_FOUND)
+      .json({ error: MessageCodes.ROUTE_NOT_FOUND });
   });
 
   app.use(errorHandler);

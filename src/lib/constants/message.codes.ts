@@ -1,68 +1,33 @@
-/**
- * Machine-readable error codes used across API responses.
- * These codes provide consistent identifiers for error types
- * that can be used by frontends or logging systems.
- */
 export enum MessageCodes {
-  /**
-   * Generic validation failure (e.g. missing/invalid fields)
-   */
+  ROUTE_NOT_FOUND = "ROUTE_NOT_FOUND",
   VALIDATION_ERROR = "VALIDATION_ERROR",
 
-  /**
-   * Required field is missing from input
-   */
   MISSING_REQUIRED_FIELD = "MISSING_REQUIRED_FIELD",
 
-  /**
-   * JWT secret key is not configured or invalid
-   */
   MISSING_SECURITY_KEY = "MISSING_SECURITY_KEY",
 
-  /**
-   * A specific field is required but was not provided
-   */
   REQUIRED_FIELD = "REQUIRED_FIELD",
 
-  /**
-   * Email format is invalid
-   */
   INVALID_EMAIL = "INVALID_EMAIL",
 
-  /**
-   * Password doesn't meet security rules
-   */
   INVALID_PASSWORD = "INVALID_PASSWORD",
 
-  /**
-   * A user with the same username or email already exists
-   */
   EXISTING_USER = "EXISTING_USER",
 
-  /**
-   * Authentication failed due to invalid credentials
-   */
   AUTH_FAILED = "AUTH_FAILED",
 
-  /**
-   * Generic server-side error
-   */
   SERVER_ERROR = "SERVER_ERROR",
 
-  /**
-   * Requested resource was not found
-   */
   NOT_FOUND = "NOT_FOUND",
 
-  /**
-   * User is not authorized to perform this action
-   */
   UNAUTHORIZED = "UNAUTHORIZED",
 
   API_ERROR = "API_ERROR",
 }
 
 export enum ErrorCodes {
+  ROUTE_NOT_FOUND = "ROUTE_NOT_FOUND",
+
   API_ERROR = "API_ERROR",
   BAD_REQUEST = "BAD_REQUEST",
   UNAUTHORIZED = "UNAUTHORIZED",
@@ -77,17 +42,33 @@ export enum ErrorCodes {
   PASSWORD_NOT_MATCHING = "PASSWORD_NOT_MATCHING",
   INVALID_CONFIGURATION = "INVALID_CONFIGURATION",
 
-  // username
+  /// JWT related
+  MISSING_JWT_SECRET = "MISSING_JWT_SECRET",
+  JWT_SECRET_TOO_SHORT = "JWT_SECRET_TOO_SHORT",
+
+  /// Email related
+  MISSING_EMAIL = "MISSING_EMAIL",
+  INVALID_EMAIL = "INVALID_EMAIL",
+
   USERNAME_TOO_SHORT = "USERNAME_TOO_SHORT",
   USERNAME_TOO_LONG = "USERNAME_TOO_LONG",
   MISSING_USERNAME = "MISSING_USERNAME",
-  MISSING_EMAIL = "MISSING_EMAIL",
+
+  /// Password related
   MISSING_PASSWORD = "MISSING_PASSWORD",
   MISSING_PASSWORD_CONFIRMATION = "MISSING_PASSWORD_CONFIRMATION",
+  PASSWORD_TOO_SHORT = "PASSWORD_TOO_SHORT",
+  PASSWORD_TOO_LONG = "PASSWORD_TOO_LONG",
+  PASSWORD_MISSING_UPPERCASE = "PASSWORD_MISSING_UPPERCASE",
+  PASSWORD_MISSING_LOWERCASE = "PASSWORD_MISSING_LOWERCASE",
+  PASSWORD_MISSING_NUMBER = "PASSWORD_MISSING_NUMBER",
+  PASSWORD_MISSING_SPECIAL_CHAR = "PASSWORD_MISSING_SPECIAL_CHAR",
 
   MISSING_SECURITY_KEY = "MISSING_SECURITY_KEY",
   SECURITY_KEY_TOO_SHORT = "SECURITY_KEY_TOO_SHORT",
   MISSING_COOKIE_EXPIRATION = "MISSING_COOKIE_EXPIRATION",
+
+  MISSING_COOKIE_NAME = "MISSING_COOKIE_NAME",
   MISSING_TOKEN = "MISSING_TOKEN",
   MISSING_HASH = "MISSING_HASH",
   MISSING_USER_ID = "MISSING_USER_ID",

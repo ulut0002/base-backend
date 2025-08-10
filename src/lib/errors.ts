@@ -60,12 +60,20 @@ enum FieldIssueType {
   message = "info",
 }
 
+type Issue = {
+  type?: FieldIssueType;
+  code?: ErrorCodes;
+  errorType?: ApiError;
+  messages?: Record<string, string | number | boolean | null | undefined>; // key = field name, value = message
+};
+
 /**
  * Represents a single validation error.
  * 'field' is optional to allow general errors.
  */
 type FieldIssue = {
   type?: FieldIssueType;
+  code?: ErrorCodes;
   field?: string;
   message?: string;
   errorType?: ApiError;
@@ -250,6 +258,18 @@ const issue = (
   message,
 });
 
+type CreateIssueParams = {
+  code?: ErrorCodes;
+  messages?: Record<string, string | number | boolean | null | undefined>;
+  type?: FieldIssueType;
+};
+
+const createIssue = (params: CreateIssueParams): Issue => ({
+  type: params.type || FieldIssueType.error,
+  code: params.code,
+  messages: params.messages,
+});
+
 export {
   messageCollector,
   createErrorResponse,
@@ -262,6 +282,7 @@ export {
   createErrorIf,
   FieldIssueType,
   issue,
+  createIssue,
 };
 
-export type { FieldIssue };
+export type { FieldIssue, Issue, CreateIssueParams };

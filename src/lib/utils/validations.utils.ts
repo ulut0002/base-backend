@@ -1,32 +1,31 @@
-import { getFixedT, TFunction } from "i18next";
 import { loadConfig } from "../config";
 
-import { FieldIssue, FieldIssueType, issue } from "../errors";
+import { createIssue, FieldIssueType, Issue } from "../errors";
 import validator from "validator";
-import { getGlobalT } from "../i18Next";
+import { ErrorCodes } from "../constants";
 
-const checkUsername = (username: string): FieldIssue[] => {
+const checkUsername = (username: string): Issue[] => {
   const config = loadConfig();
-  const t = getGlobalT();
 
-  const issues: FieldIssue[] = [];
+  const issues: Issue[] = [];
   if (config.userUsernameRequired) {
     if (!username) {
       issues.push(
-        issue(t("username"), t("required", { field: t("username") }))
+        createIssue({
+          code: ErrorCodes.MISSING_USERNAME,
+        })
       );
     }
 
     if (username && config.userUsernameMinLength) {
       if (username.length < config.userUsernameMinLength) {
         issues.push(
-          issue(
-            t("username"),
-            t("minLength", {
-              field: t("username"),
-              min: config.userUsernameMinLength,
-            })
-          )
+          createIssue({
+            code: ErrorCodes.USERNAME_TOO_SHORT,
+            messages: {
+              minLength: config.userUsernameMinLength.toString(),
+            },
+          })
         );
       }
 
@@ -36,13 +35,12 @@ const checkUsername = (username: string): FieldIssue[] => {
         username.length > config.userUsernameMaxLength
       ) {
         issues.push(
-          issue(
-            t("username"),
-            t("maxLength", {
-              field: t("username"),
-              min: config.userUsernameMaxLength,
-            })
-          )
+          createIssue({
+            code: ErrorCodes.USERNAME_TOO_LONG,
+            messages: {
+              maxLength: config.userUsernameMaxLength.toString(),
+            },
+          })
         );
       }
     }
@@ -50,108 +48,130 @@ const checkUsername = (username: string): FieldIssue[] => {
   return issues;
 };
 
-const checkEmail = (email: string): FieldIssue[] => {
+const checkEmail = (email: string): Issue[] => {
   const config = loadConfig();
-  const issues: FieldIssue[] = [];
-  const t = getGlobalT();
+  const issues: Issue[] = [];
 
   if (config.userEmailRequired) {
     if (!email) {
-      issues.push(issue(t("email"), t("required", { field: t("email") })));
+      issues.push(
+        createIssue({
+          code: ErrorCodes.MISSING_EMAIL,
+        })
+      );
     }
     if (email && !validator.isEmail(email)) {
-      issues.push(issue(t("email"), t("invalid", { field: t("email") })));
+      issues.push(
+        createIssue({
+          code: ErrorCodes.INVALID_EMAIL,
+        })
+      );
     }
   }
 
   return issues;
 };
 
-const checkPassword = (password: string): FieldIssue[] => {
+const checkPassword = (password: string): Issue[] => {
   const config = loadConfig();
-  const t = getGlobalT();
-  const issues: FieldIssue[] = [];
-  let more: boolean = true;
+  const issues: Issue[] = [];
 
-  const field = t("password");
+  let checkMore: boolean = true;
 
-  if (more) {
+  if (checkMore) {
     if (!password) {
-      issues.push(issue(field, t("auth.updatePassword.newPasswordRequired")));
-      more = false;
+      issues.push(
+        createIssue({
+          code: ErrorCodes.MISSING_PASSWORD,
+        })
+      );
+      checkMore = false;
     }
   }
 
-  if (more) {
+  if (checkMore) {
     if (password.length < config.passwordMinLength!) {
       issues.push(
-        issue(
-          field,
-          t("minLength", {
-            field,
-            min: config.passwordMinLength,
-          })
-        )
+        createIssue({
+          code: ErrorCodes.PASSWORD_TOO_SHORT,
+          messages: {
+            minLength: config.passwordMinLength,
+            currentLength: password.length.toString(),
+          },
+        })
       );
     }
   }
 
-  if (more) {
+  if (checkMore) {
     if (password.length > config.passwordMaxLength!) {
       issues.push(
-        issue(
-          field,
-          t("maxLength", {
-            field,
-            max: config.passwordMaxLength,
-          })
-        )
+        createIssue({
+          code: ErrorCodes.PASSWORD_TOO_LONG,
+          messages: {
+            maxLength: config.passwordMaxLength,
+            currentLength: password.length,
+          },
+        })
       );
     }
   }
 
-  if (more) {
+  if (checkMore) {
     if (config.passwordRequireUppercase && !/[A-Z]/.test(password)) {
       issues.push(
-        issue(field, t("auth.updatePassword.passwordMissingUppercase"))
+        createIssue({
+          code: ErrorCodes.PASSWORD_MISSING_UPPERCASE,
+        })
       );
     }
   }
 
-  if (more) {
+  if (checkMore) {
     if (config.passwordRequireLowercase && !/[a-z]/.test(password)) {
       issues.push(
-        issue(field, t("auth.updatePassword.passwordMissingLowercase"))
+        createIssue({
+          code: ErrorCodes.PASSWORD_MISSING_LOWERCASE,
+        })
       );
     }
   }
 
-  if (more) {
+  if (checkMore) {
     if (config.passwordRequireNumbers && !/[0-9]/.test(password)) {
-      issues.push(issue(field, t("auth.updatePassword.passwordMissingNumber")));
+      issues.push(
+        createIssue({
+          code: ErrorCodes.PASSWORD_MISSING_NUMBER,
+        })
+      );
     }
   }
 
-  if (more) {
+  if (checkMore) {
     if (
       config.passwordRequireSpecialChars &&
       !/[!@#$%^&*(),.?":{}|<>_\-+=/\\[\]`~;'’]/.test(password)
     ) {
       issues.push(
-        issue(field, t("uth.updatePassword.passwordMissingSpecialChar"))
+        createIssue({
+          code: ErrorCodes.PASSWORD_MISSING_SPECIAL_CHAR,
+        })
       );
     }
   }
 
   return issues;
 };
-const checkAuthConfiguration = (): FieldIssue[] => {
+const checkAuthConfiguration = (): Issue[] => {
   const config = loadConfig();
-  const issues: FieldIssue[] = [];
-  const t = getGlobalT();
+  const issues: Issue[] = [];
 
   if (!config.backendJwtSecretKey) {
-    issues.push(issue("Jwt_Key", t("system.config.jwtRequired")));
+    issues.push(
+      createIssue({
+        code: ErrorCodes.MISSING_JWT_SECRET,
+      })
+    );
   }
 
   if (
@@ -159,26 +179,38 @@ const checkAuthConfiguration = (): FieldIssue[] => {
     config.backendJwtSecretKey.trim().length < 16
   ) {
     issues.push(
-      issue("Jwt_Key", t("system.config.jwtTooShort"), FieldIssueType.warning)
+      createIssue({
+        code: ErrorCodes.JWT_SECRET_TOO_SHORT,
+        type: FieldIssueType.warning,
+        messages: {
+          minLength: 16,
+          currentLength: config.backendJwtSecretKey.trim().length,
+        },
+      })
     );
   }
 
   if (!config.cookieExpirationMinutes) {
     issues.push(
-      issue("Cookie_Expiration", t("system.config.cookieExpirationNotSet"))
+      createIssue({
+        code: ErrorCodes.MISSING_COOKIE_EXPIRATION,
+      })
     );
   }
 
   if (!config.cookieName) {
-    issues.push(issue("Cookie_Name", t("system.config.cookieNameNotSet")));
+    issues.push(
+      createIssue({
+        code: ErrorCodes.MISSING_COOKIE_NAME,
+      })
+    );
   }
 
   if (!config.userEmailRequired && !config.userUsernameRequired) {
     issues.push(
-      issue(
-        "Registration_Configuration",
-        t("system.config.emailOrUsernameRequired")
-      )
+      createIssue({
+        code: ErrorCodes.MISSING_EMAIL,
+      })
     );
   }
 

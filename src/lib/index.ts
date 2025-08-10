@@ -13,6 +13,9 @@ import {
   FieldIssue,
   FieldIssueType,
   issue,
+  Issue,
+  createIssue,
+  CreateIssueParams,
 } from "./errors";
 import { configureApp } from "./express";
 import {
@@ -39,11 +42,14 @@ export {
   ForbiddenError,
   createErrorIf,
   issue,
+  CreateIssueParams,
+  createIssue,
 };
+
 export { logger };
 export { connectToDatabase, disconnectFromDatabase };
 export { configureApp };
 export { setMailProfiles, getMailProfiles, getMailProfile };
-export type { FieldIssue };
+export type { FieldIssue, Issue };
 export { FieldIssueType };
 export { parseAcceptLanguage, resolveT, setGlobalT, getGlobalT };

@@ -14,11 +14,11 @@ import {
   BadRequestError,
   FieldIssue,
   getGlobalT,
+  Issue,
   issue,
   loadConfig,
   resolveT,
 } from "../lib";
-import { ErrorCodes } from "../lib/constants";
 import {
   checkEmail,
   checkAuthConfiguration,
@@ -97,7 +97,7 @@ const register = async (
 
   // Pre-registration validation (e.g., format, presence, config checks)
   const t = resolveT(req);
-  const issues: FieldIssue[] = [
+  const issues: Issue[] = [
     ...checkUsername(username),
     ...checkEmail(email),
     ...checkPassword(password),

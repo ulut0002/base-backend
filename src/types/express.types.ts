@@ -1,5 +1,5 @@
 import "express";
-import { FieldIssue, FieldIssueType } from "../lib";
+import { FieldIssue, FieldIssueType, Issue } from "../lib";
 import { TypeOrNull } from "./generic.types";
 import { Request } from "express";
 import { TFunction } from "i18next";
@@ -10,7 +10,7 @@ interface RequestMetaData {
   errors: FieldIssue[];
   warnings: FieldIssue[];
   messages: FieldIssue[];
-  addIssue: (issue: FieldIssue, issueType: FieldIssueType) => void;
+  addIssue: (issue: Issue, issueType: FieldIssueType) => void;
   hasErrors: () => boolean;
   hasWarnings: () => boolean;
   hasMessages: () => boolean;
@@ -51,7 +51,7 @@ declare module "express" {
  */
 export function addIssuesToRequest(
   req: Request,
-  issues: FieldIssue[] = []
+  issues: Issue[] = []
 ): boolean {
   let hasErrors = false;
 
