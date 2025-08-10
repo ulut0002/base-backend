@@ -15,7 +15,6 @@ import {
   CreateIssueParams,
 } from "./errors";
 import { configureApp } from "./express";
-import { parseAcceptLanguage, setGlobalT, getGlobalT } from "./i18Next";
 import { logger } from "./logger";
 import { getMailProfile, getMailProfiles, setMailProfiles } from "./mailConfig";
 
@@ -40,4 +39,3 @@ export { configureApp };
 export { setMailProfiles, getMailProfiles, getMailProfile };
 export type { Issue };
 export { IssueType };
-export { parseAcceptLanguage, setGlobalT, getGlobalT };

@@ -1,5 +1,5 @@
 import normalizeEmail from "normalize-email";
-import { getGlobalT, loadConfig } from "../lib";
+import { loadConfig } from "../lib";
 import { ErrorCodes } from "../lib/constants";
 import { minutesToSeconds } from "../lib/utils";
 import {
@@ -37,7 +37,6 @@ const registerUser = async ({
 }: RegisterUserInput): Promise<RegisterUserResult> => {
   const envConfig = loadConfig();
   const normalizedEmail = normalizeEmail(email);
-  const t = getGlobalT();
 
   // Check if a user already exists with the same username or email
   let existingUser = await findExistingUserByUsernameOrEmail({
@@ -113,7 +112,6 @@ const loginUser = async ({
   jwtSecretKey,
 }: LoginUserInput): Promise<LoginUserResult> => {
   const envConfig = loadConfig();
-  const t = getGlobalT();
 
   // Try to find the user using raw input
   let user = await findExistingUserByUsernameOrEmail({ usernameOrEmail });
@@ -182,7 +180,6 @@ const changeUserPassword = async ({
   currentPassword: string;
   newPassword: string;
 }): Promise<ChangePasswordResult> => {
-  const t = getGlobalT();
   const issues: Issue[] = [];
   let continueProcess = true;
 

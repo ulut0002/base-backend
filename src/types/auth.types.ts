@@ -1,6 +1,6 @@
 // src/types/auth.types.ts
 
-import { FieldIssue } from "../lib";
+import { Issue } from "../lib";
 import { TypeOrNull } from "./generic.types";
 import { UserDocument } from "./user.types";
 
@@ -15,7 +15,7 @@ interface RegisterUserInput {
 interface RegisterUserResult {
   token?: TypeOrNull<string>;
   userObject?: any;
-  issues?: FieldIssue[];
+  issues?: Issue[];
 }
 
 interface LoginUserInput {
@@ -27,12 +27,12 @@ interface LoginUserInput {
 interface LoginUserResult {
   token?: TypeOrNull<string>;
   userObject?: any;
-  issues?: FieldIssue[];
+  issues?: Issue[];
 }
 
 interface ChangePasswordResult {
   userObject?: any;
-  issues?: FieldIssue[];
+  issues?: Issue[];
 }
 
 type MeResponse = {
@@ -50,7 +50,7 @@ type VerificationCodeType =
 type VerificationCodeStatus = "PENDING" | "VERIFIED" | "EXPIRED";
 
 export enum UserRole {
-  SUPERADMIN = "superadmin",
+  SUPER_ADMIN = "super_admin",
   ADMIN = "admin",
   USER = "user",
 }

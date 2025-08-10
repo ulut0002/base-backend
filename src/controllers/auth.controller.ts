@@ -10,13 +10,7 @@ import {
 
 import { StrategyOptions, Strategy as JwtStrategy } from "passport-jwt";
 import { PassportStatic } from "passport";
-import {
-  BadRequestError,
-  createIssue,
-  getGlobalT,
-  Issue,
-  loadConfig,
-} from "../lib";
+import { BadRequestError, createIssue, Issue, loadConfig } from "../lib";
 import {
   checkEmail,
   checkAuthConfiguration,
@@ -278,7 +272,6 @@ const changePassword = async (
   const user = req.user as any;
   const { currentPassword, newPassword } = req.body;
   const issues: Issue[] = [];
-  const t = getGlobalT();
 
   if (!currentPassword) {
     issues.push(

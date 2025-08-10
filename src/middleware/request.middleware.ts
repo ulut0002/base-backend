@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { UserRole } from "../types";
-import { Issue, IssueType, parseAcceptLanguage } from "../lib";
+import { Issue, IssueType } from "../lib";
 
 /**
  * Middleware to ensure that `req.body` is always defined and an object.
@@ -54,7 +54,6 @@ const ensureBody = (req: Request, _res: Response, next: NextFunction) => {
     registrationToken: null,
     loginToken: null,
     success: false,
-    language: parseAcceptLanguage(acceptLangHeader),
   };
 
   next();
@@ -66,7 +65,7 @@ const ensureBody = (req: Request, _res: Response, next: NextFunction) => {
 const rolePriority: Record<UserRole, number> = {
   [UserRole.USER]: 1,
   [UserRole.ADMIN]: 2,
-  [UserRole.SUPERADMIN]: 3,
+  [UserRole.SUPER_ADMIN]: 3,
 };
 
 /**
