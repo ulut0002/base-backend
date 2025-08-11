@@ -1,4 +1,4 @@
-import { UserModel } from "../modals";
+import { UserModel } from "../models";
 import { TypeOrNull, UserRegistrationDTO } from "../types";
 
 /**

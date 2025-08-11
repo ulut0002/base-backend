@@ -34,6 +34,7 @@ const registerUser = async ({
   email,
   password,
   jwtSecretKey,
+  passwordHashLength,
 }: RegisterUserInput): Promise<RegisterUserResult> => {
   const envConfig = loadConfig();
   const normalizedEmail = normalizeEmail(email);
@@ -58,7 +59,7 @@ const registerUser = async ({
   }
 
   // Hash the password before saving
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password, passwordHashLength);
 
   // Create the user
 

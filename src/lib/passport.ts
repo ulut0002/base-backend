@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy as JwtStrategy, StrategyOptions } from "passport-jwt";
 import { Request } from "express";
-import { UserModel } from "../modals";
+import { UserModel } from "../models";
 import { loadConfig } from "./config";
 
 // Load the JWT secret key from environment variables.

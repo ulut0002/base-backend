@@ -7,8 +7,8 @@ import {
   normalizeEmail,
   sendPasswordResetEmail,
 } from "../lib/utils";
-import { UserModel } from "../modals";
-import { VerificationCodeModel } from "../modals/VerificationCode";
+import { UserModel } from "../models";
+import { VerificationCodeModel } from "../models/VerificationCode";
 import { findExistingUserByUsernameOrEmail } from "./user.services";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";

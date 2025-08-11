@@ -10,6 +10,7 @@ import {
   UserRole,
   VerificationCodeStatus,
   VerificationCodeType,
+  RegisterUserResponseData,
 } from "./auth.types";
 
 // Config Types
@@ -59,6 +60,7 @@ export type {
   SessionData,
   VerificationCodeStatus,
   VerificationCodeType,
+  RegisterUserResponseData,
 };
 
 // Auth Types Named Export

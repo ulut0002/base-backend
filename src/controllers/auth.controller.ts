@@ -16,10 +16,11 @@ import {
   checkAuthConfiguration,
   checkUsername,
   checkPassword,
+  checkPasswordSetup,
 } from "../lib/utils";
 import normalizeEmail from "normalize-email";
-import { addIssuesToRequest } from "../types";
-import { ErrorCodes, MessageCodes } from "../lib/constants";
+import { addIssuesToRequest, RegisterUserResponseData } from "../types";
+import { ErrorCodes } from "../lib/constants";
 
 /**
  * Configures Passport.js with JWT strategy.
@@ -78,50 +79,52 @@ const register = async (
   const jwtSecretKey = envConfig.backendJwtSecretKey || "";
 
   // Extract and normalize inputs from request body
-  const rawUsername = req.body.username?.trim() || "";
-  const rawEmail = req.body.email?.trim().toLowerCase() || "";
-  const password = req.body.password || "";
+  const rawUsername: string = req.body.username?.trim() || "";
+  const rawEmail: string = req.body.email?.trim().toLowerCase() || "";
+  const password: string = req.body.password || "";
+  const normalizedEmail: string = normalizeEmail(rawEmail);
 
   // Normalize email if enabled in config
-  const email = envConfig.normalizeEmails ? normalizeEmail(rawEmail) : rawEmail;
+  const email = envConfig.useNormalizedEmails ? normalizedEmail : rawEmail;
 
   // Use email as username if usernames are not required
   const username = envConfig.userUsernameRequired ? rawUsername : email;
 
   // Pre-registration validation (e.g., format, presence, config checks)
-  const issues: Issue[] = [
+  let preIssues: Issue[] = [
     ...checkUsername(username),
     ...checkEmail(email),
     ...checkPassword(password),
     ...checkAuthConfiguration(),
+    ...checkPasswordSetup(),
   ];
 
   // Attach validation issues to request and short-circuit if there are any errors
-  const hasPreValidationErrors = addIssuesToRequest(req, issues);
+  const hasPreValidationErrors = addIssuesToRequest(req, preIssues);
   if (hasPreValidationErrors) return next();
 
   try {
     // Attempt to register the user (hash password, save to DB, issue JWT)
-    const {
-      token,
-      userObject,
-      issues: postIssues,
-    } = await registerUser({
+    const { token, userObject, issues } = await registerUser({
       username,
       email,
+      normalizedEmail,
       password,
       jwtSecretKey,
+      passwordHashLength: envConfig.passwordHashLength!,
     });
 
     // Attach post-registration issues (e.g., database constraints) to request
-    const hasPostValidationErrors = addIssuesToRequest(req, postIssues);
+    addIssuesToRequest(req, issues);
 
     // Populate request data state for response middleware
-    req.xData!.userId = userObject?._id.toString() || null;
-    req.xData!.success = !!token;
-    req.xData!.registrationToken = token || null;
-
-    // Pass control to next response handler
+    const result: RegisterUserResponseData = {
+      userId: userObject?._id.toString() || null,
+      success: !!token,
+      registrationToken: token || null,
+    };
+    req.xData!.registerUserResult = result;
+    req.xData!.userId = userObject?._id.toString();
     next();
   } catch (err: any) {
     const issues: Issue[] = [];
@@ -144,59 +147,63 @@ const register = async (
  */
 const login = async (
   req: Request,
-  _: Response,
+  res: Response,
   next: NextFunction
 ): Promise<void> => {
-  // Load app configuration (JWT secret, email normalization, etc.)
   const envConfig = loadConfig();
   const jwtSecretKey = envConfig.backendJwtSecretKey || "";
-
-  const rawUsernameOrEmail = req.body.username?.trim() || null;
-  const rawPassword = req.body.password || null;
-
   let { username, password } = req.body;
 
-  let issues: Issue[] = [];
+  const rawUsernameOrEmail = username?.trim() || null;
+  const rawPassword = password || null;
+
+  let preIssues: Issue[] = [];
 
   // Validate inputs
   if (!username) {
-    issues.push(
+    preIssues.push(
       createIssue({
         code: ErrorCodes.MISSING_USERNAME,
       })
     );
   }
   if (!password) {
-    issues.push(
+    preIssues.push(
       createIssue({
         code: ErrorCodes.MISSING_PASSWORD,
       })
     );
   }
-  issues = [...issues, ...checkAuthConfiguration()];
+  preIssues = [
+    ...preIssues,
+    ...checkAuthConfiguration(),
+    ...checkPasswordSetup(),
+  ];
 
   // Attach validation issues to request and short-circuit if there are any errors
-  const hasPreValidationErrors = addIssuesToRequest(req, issues);
+  const hasPreValidationErrors = addIssuesToRequest(req, preIssues);
   if (hasPreValidationErrors) return next();
 
   try {
-    const {
-      token,
-      userObject,
-      issues: postIssues,
-    } = await loginUser({
+    const { token, userObject, issues } = await loginUser({
       usernameOrEmail: username,
       password,
       jwtSecretKey: jwtSecretKey!,
     });
 
-    addIssuesToRequest(req, postIssues);
+    addIssuesToRequest(req, issues);
     req.xData!.userId = userObject?._id.toString() || null;
     req.xData!.success = !!token;
     req.xData!.loginToken = token || null;
 
     next();
   } catch (err: any) {
+    res.clearCookie(envConfig.cookieName!, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
     next(new BadRequestError(err.message || "Login failed"));
   }
 };
@@ -271,33 +278,37 @@ const changePassword = async (
 ): Promise<void> => {
   const user = req.user as any;
   const { currentPassword, newPassword } = req.body;
-  const issues: Issue[] = [];
+  let preIssues: Issue[] = [];
 
   if (!currentPassword) {
-    issues.push(
+    preIssues.push(
       createIssue({
         code: ErrorCodes.MISSING_PASSWORD,
       })
     );
   }
 
-  issues.concat(checkPassword(newPassword));
+  preIssues = [
+    ...preIssues,
+    ...checkPassword(newPassword),
+    ...checkPasswordSetup(),
+  ];
 
-  const hasPreValidationErrors = addIssuesToRequest(req, issues);
+  const hasPreValidationErrors = addIssuesToRequest(req, preIssues);
   if (hasPreValidationErrors) return next();
 
   try {
-    const { userObject, issues: postIssues } = await changeUserPassword({
+    const { issues } = await changeUserPassword({
       userId: user._id,
       currentPassword,
       newPassword,
     });
 
-    addIssuesToRequest(req, postIssues);
+    addIssuesToRequest(req, issues);
 
     next();
   } catch (err: any) {
-    next(new BadRequestError(err.message || "Failed to change password"));
+    next(new BadRequestError(err.message || "Failed to change the password"));
   }
 };
 

@@ -3,6 +3,7 @@ import { Issue, IssueType } from "../lib";
 import { TypeOrNull } from "./generic.types";
 import { Request } from "express";
 import { TFunction } from "i18next";
+import { RegisterUserResponseData } from "./auth.types";
 
 // Update src/middleware/request.middleware.ts as well
 
@@ -28,6 +29,7 @@ interface RequestMetaData {
 }
 
 export interface RequestDataState {
+  registerUserResult?: RegisterUserResponseData;
   userId?: TypeOrNull<string>;
   registrationToken?: TypeOrNull<string>;
   loginToken?: TypeOrNull<string>;
@@ -47,7 +49,7 @@ declare module "express" {
 }
 
 /**
- * Adds a list of FieldIssues to req.xMeta and returns true if there are any error-level issues.
+ * Adds a list of Issues to req.xMeta and returns true if there are any error-level issues.
  */
 export function addIssuesToRequest(
   req: Request,

@@ -9,6 +9,10 @@ let _cachedConfig: EnvConfig | null = null;
 function loadConfig(): EnvConfig {
   // if (_cachedConfig) return _cachedConfig;
 
+  function escapeRegExp(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
   _cachedConfig = {
     // Required environment variables
     backendUrl: getRequiredEnv("URL"),
@@ -22,7 +26,7 @@ function loadConfig(): EnvConfig {
     userEmailRequired: isTrue(process.env.USER_EMAIL_REQUIRED),
     userUsernameMinLength: parseNumberEnv("USER_USERNAME_MIN_LENGTH"),
     userUsernameMaxLength: parseNumberEnv("USER_USERNAME_MAX_LENGTH"),
-    normalizeEmails: isTrue(process.env.NORMALIZE_EMAILS),
+    useNormalizedEmails: isTrue(process.env.NORMALIZE_EMAILS),
 
     // Optional environment variables with defaults
 
@@ -33,12 +37,14 @@ function loadConfig(): EnvConfig {
     // Password settings
     passwordMinLength: parseNumberEnv("PASSWORD_MIN_LENGTH", 4),
     passwordMaxLength: parseNumberEnv("PASSWORD_MAX_LENGTH", 64),
+    passwordHashLength: parseNumberEnv("PASSWORD_HASH_LENGTH", 10),
     passwordRequireUppercase: isTrue(process.env.PASSWORD_REQUIRE_UPPERCASE),
     passwordRequireLowercase: isTrue(process.env.PASSWORD_REQUIRE_LOWERCASE),
     passwordRequireNumbers: isTrue(process.env.PASSWORD_REQUIRE_NUMBERS),
     passwordRequireSpecialChars: isTrue(
       process.env.PASSWORD_REQUIRE_SPECIAL_CHARS
     ),
+    passwordSpecialChars: process.env.PASSWORD_SPECIAL_CHARS || "",
 
     // Password reset settings
     passwordResetWindowMinutes: parseNumberEnv("PASSWORD_RESET_WINDOW_MINUTES"),
@@ -64,6 +70,15 @@ function loadConfig(): EnvConfig {
       ? process.env.SUPPORT_LANGUAGES.split(",").map((lang) => lang.trim())
       : ["en"],
   };
+
+  if (
+    _cachedConfig.passwordRequireSpecialChars &&
+    _cachedConfig.passwordSpecialChars
+  ) {
+    _cachedConfig.passwordSpecialCharsRegex = new RegExp(
+      new RegExp(`[${escapeRegExp(_cachedConfig.passwordSpecialChars)}]`, "u")
+    );
+  }
   return _cachedConfig;
 }
 

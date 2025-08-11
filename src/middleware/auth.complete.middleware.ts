@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError, loadConfig, logger } from "../lib";
 import { minutesToMilliseconds } from "../lib/utils";
-import { log } from "console";
 import { ErrorCodes } from "../lib/constants";
 import { MeResponse, UserDocument } from "../types";
 
@@ -9,8 +8,9 @@ const registerComplete = (req: Request, res: Response, next: NextFunction) => {
   const envConfig = loadConfig();
   const success = !req.xMeta?.hasErrors();
   if (success) {
+    const result = req.xData!.registerUserResult;
     res
-      .cookie(envConfig.cookieName!, req.xData!.registrationToken, {
+      .cookie(envConfig.cookieName!, result?.registrationToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
@@ -35,6 +35,12 @@ const loginComplete = (req: Request, res: Response, next: NextFunction) => {
 
   const token = req.xData?.loginToken || null;
   if (!success) {
+    res.clearCookie(envConfig.cookieName!, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
     return next(new BadRequestError("Login has failed for some reason"));
   }
 

@@ -8,7 +8,7 @@ import {
   verifyUserAccount,
 } from "../services";
 import { requestPasswordReset } from "../services/recovery.services";
-import { VerificationCodeModel } from "../modals/VerificationCode";
+import { VerificationCodeModel } from "../models/VerificationCode";
 import { BadRequestError, createErrorIf, NotFoundError } from "../lib";
 import { ErrorCodes } from "../lib/constants";
 

@@ -10,12 +10,19 @@ interface RegisterUserInput {
   normalizedEmail?: string;
   password: string;
   jwtSecretKey: string;
+  passwordHashLength: number;
 }
 
 interface RegisterUserResult {
   token?: TypeOrNull<string>;
   userObject?: any;
   issues?: Issue[];
+}
+
+interface RegisterUserResponseData {
+  userId: TypeOrNull<string>;
+  success: boolean;
+  registrationToken: TypeOrNull<string>;
 }
 
 interface LoginUserInput {
@@ -71,4 +78,5 @@ export type {
   ChangePasswordResult,
   MeResponse,
   SessionData,
+  RegisterUserResponseData,
 };

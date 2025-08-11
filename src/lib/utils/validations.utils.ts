@@ -17,17 +17,19 @@ const checkUsername = (username: string): Issue[] => {
       );
     }
 
-    if (username && config.userUsernameMinLength) {
-      if (username.length < config.userUsernameMinLength) {
-        issues.push(
-          createIssue({
-            code: ErrorCodes.USERNAME_TOO_SHORT,
-            messages: {
-              minLength: config.userUsernameMinLength.toString(),
-            },
-          })
-        );
-      }
+    if (
+      username &&
+      config.userUsernameMinLength &&
+      username.length < config.userUsernameMinLength
+    ) {
+      issues.push(
+        createIssue({
+          code: ErrorCodes.USERNAME_TOO_SHORT,
+          messages: {
+            minLength: config.userUsernameMinLength,
+          },
+        })
+      );
 
       if (
         username &&
@@ -38,7 +40,7 @@ const checkUsername = (username: string): Issue[] => {
           createIssue({
             code: ErrorCodes.USERNAME_TOO_LONG,
             messages: {
-              maxLength: config.userUsernameMaxLength.toString(),
+              maxLength: config.userUsernameMaxLength,
             },
           })
         );
@@ -150,7 +152,9 @@ const checkPassword = (password: string): Issue[] => {
   if (checkMore) {
     if (
       config.passwordRequireSpecialChars &&
-      !/[!@#$%^&*(),.?":{}|<>_\-+=/\\[\]`~;'’]/.test(password)
+      config.passwordSpecialChars &&
+      config.passwordSpecialCharsRegex &&
+      !config.passwordSpecialCharsRegex.test(password)
     ) {
       issues.push(
         createIssue({
@@ -217,4 +221,25 @@ const checkAuthConfiguration = (): Issue[] => {
   return issues;
 };
 
-export { checkUsername, checkEmail, checkAuthConfiguration, checkPassword };
+const checkPasswordSetup = (): Issue[] => {
+  const config = loadConfig();
+  const issues: Issue[] = [];
+
+  if (!config.passwordHashLength) {
+    issues.push(
+      createIssue({
+        code: ErrorCodes.MISSING_PASSWORD_HASH_LENGTH,
+      })
+    );
+  }
+
+  return issues;
+};
+
+export {
+  checkUsername,
+  checkEmail,
+  checkAuthConfiguration,
+  checkPassword,
+  checkPasswordSetup,
+};

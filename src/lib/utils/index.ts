@@ -17,6 +17,7 @@ import {
   checkAuthConfiguration,
   checkEmail,
   checkPassword,
+  checkPasswordSetup,
 } from "./validations.utils";
 
 export {
@@ -35,4 +36,5 @@ export {
   getRequiredEnv,
   parseNumberEnv,
   createUrl,
+  checkPasswordSetup,
 };
