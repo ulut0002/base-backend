@@ -69,6 +69,10 @@ function loadConfig(): EnvConfig {
     supportLanguages: process.env.SUPPORT_LANGUAGES
       ? process.env.SUPPORT_LANGUAGES.split(",").map((lang) => lang.trim())
       : ["en"],
+
+    superAdminName: process.env.SUPER_ADMIN_NAME,
+    superAdminEmail: process.env.SUPER_ADMIN_EMAIL,
+    superAdminUsername: process.env.SUPER_ADMIN_USERNAME,
   };
 
   if (

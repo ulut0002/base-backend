@@ -1,3 +1,4 @@
+import { createSuperAdminIfNeeded } from "./admin.services";
 import { registerUser, loginUser, changeUserPassword } from "./auth.services";
 import {
   resendVerificationEmail,
@@ -54,3 +55,5 @@ export {
   resendVerificationEmail,
   deleteExpiredVerificationCodes,
 };
+
+export { createSuperAdminIfNeeded };

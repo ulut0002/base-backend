@@ -44,6 +44,10 @@ type EnvConfig = Partial<{
   enableSocketIo: boolean; // Whether to enable Socket.IO support
 
   supportLanguages: string[]; // List of supported languages for i18n
+
+  superAdminName: string;
+  superAdminEmail: string;
+  superAdminUsername: string; // Username for the super admin account
 }>;
 
 export type { EnvConfig };

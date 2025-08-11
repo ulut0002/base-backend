@@ -28,6 +28,7 @@ import {
 import { configureJwtStrategy } from "./controllers";
 import { createSocketServer } from "./lib/sockets";
 import { HTTP_STATUS, MessageCodes } from "./lib/constants";
+import { createSuperAdminIfNeeded } from "./services";
 
 // -------------------------
 // Load Environment Variables and App Config
@@ -112,6 +113,10 @@ async function initializeApp(): Promise<void> {
 async function initializeBusinessLogic() {
   logger.info("Running custom app initialization logic...");
   // Example: await seedDatabase(); or check system health
+
+  // check if superadmin exists. It not, create one.
+
+  await createSuperAdminIfNeeded();
 
   // Setting up emails
 }
