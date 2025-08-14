@@ -52,6 +52,11 @@ authRouter.get(
   ...completeAuthMiddleware.me
 );
 
+authRouter.post(
+  "/request-password-change",
+  passport.authenticate("jwt", { session: false })
+);
+
 authRouter.patch(
   "/change-password",
   passport.authenticate("jwt", { session: false }),

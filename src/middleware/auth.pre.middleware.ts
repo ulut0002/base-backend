@@ -35,6 +35,43 @@ const logoutPre2 = (req: Request, res: Response, next: NextFunction) => {
   console.log("Pre-logout #2 middleware executed");
   next();
 };
+
+const requestPasswordChangePre1 = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("Pre-requestPasswordChange #1 middleware executed");
+  next();
+};
+
+const requestPasswordChangePre2 = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("Pre-requestPasswordChange #2 middleware executed");
+  next();
+};
+
+const validatePasswordRequestCodePre1 = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("Pre-validatePasswordRequestCode #1 middleware executed");
+  next();
+};
+
+const validatePasswordRequestCodePre2 = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("Pre-validatePasswordRequestCode #2 middleware executed");
+  next();
+};
+
 const changePasswordPre1 = (
   req: Request,
   res: Response,
@@ -86,4 +123,8 @@ export {
   refreshTokenPre2,
   statusPre1,
   statusPre2,
+  requestPasswordChangePre1,
+  requestPasswordChangePre2,
+  validatePasswordRequestCodePre1,
+  validatePasswordRequestCodePre2,
 };

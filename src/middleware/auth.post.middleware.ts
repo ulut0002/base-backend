@@ -72,6 +72,42 @@ const statusPost2 = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
+const requestPasswordChangePost1 = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("Post-requestPasswordChange #1 middleware executed");
+  next();
+};
+
+const requestPasswordChangePost2 = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("Post-requestPasswordChange #2 middleware executed");
+  next();
+};
+
+const validatePasswordRequestCodePost1 = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("Post-validatePasswordRequestCode #1 middleware executed");
+  next();
+};
+
+const validatePasswordRequestCodePost2 = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("Post-validatePasswordRequestCode #2 middleware executed");
+  next();
+};
+
 export {
   loginPost1,
   loginPost2,
@@ -87,4 +123,8 @@ export {
   refreshTokenPost2,
   statusPost1,
   statusPost2,
+  requestPasswordChangePost1,
+  requestPasswordChangePost2,
+  validatePasswordRequestCodePost1,
+  validatePasswordRequestCodePost2,
 };

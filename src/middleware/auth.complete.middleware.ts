@@ -119,6 +119,24 @@ const authStatusComplete = (
   res.status(200).json({ authenticated: isAuthenticated });
 };
 
+const requestPasswordChangeComplete = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("Post-requestPasswordChange #1 middleware executed");
+  next();
+};
+
+const validatePasswordRequestCodeComplete = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("Post-validatePasswordRequestCode #1 middleware executed");
+  next();
+};
+
 export {
   authStatusComplete,
   registerComplete,
@@ -127,4 +145,6 @@ export {
   logoutComplete,
   changePasswordComplete,
   refreshTokenComplete,
+  requestPasswordChangeComplete,
+  validatePasswordRequestCodeComplete,
 };

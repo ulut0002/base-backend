@@ -5,6 +5,8 @@ interface AuthMiddlewareMap {
   register: RequestHandler[];
   me: RequestHandler[];
   logout: RequestHandler[];
+  requestPasswordChange: RequestHandler[];
+  validatePasswordRequestCode: RequestHandler[];
   changePassword: RequestHandler[];
   refreshToken: RequestHandler[];
   status: RequestHandler[];

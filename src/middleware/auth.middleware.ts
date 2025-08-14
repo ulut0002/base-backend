@@ -13,6 +13,10 @@ import {
   registerPre2,
   statusPre1,
   statusPre2,
+  requestPasswordChangePre1,
+  requestPasswordChangePre2,
+  validatePasswordRequestCodePre1,
+  validatePasswordRequestCodePre2,
 } from "./auth.pre.middleware";
 
 import {
@@ -30,6 +34,10 @@ import {
   registerPost2,
   statusPost1,
   statusPost2,
+  requestPasswordChangePost1,
+  requestPasswordChangePost2,
+  validatePasswordRequestCodePost1,
+  validatePasswordRequestCodePost2,
 } from "./auth.post.middleware";
 import { AuthMiddlewareMap } from "../types";
 import {
@@ -40,6 +48,8 @@ import {
   meComplete,
   refreshTokenComplete,
   registerComplete,
+  requestPasswordChangeComplete,
+  validatePasswordRequestCodeComplete,
 } from "./auth.complete.middleware";
 
 // Pre-middlewares (before controller logic)
@@ -51,6 +61,11 @@ export const preAuthMiddleware: AuthMiddlewareMap = {
   changePassword: [changePasswordPre1, changePasswordPre2],
   refreshToken: [refreshTokenPre1, refreshTokenPre2],
   status: [statusPre1, statusPre2],
+  requestPasswordChange: [requestPasswordChangePre1, requestPasswordChangePre2],
+  validatePasswordRequestCode: [
+    validatePasswordRequestCodePre1,
+    validatePasswordRequestCodePre2,
+  ],
 };
 
 // Post-middlewares (after controller logic)
@@ -62,6 +77,14 @@ export const postAuthMiddleware: AuthMiddlewareMap = {
   changePassword: [changePasswordPost1, changePasswordPost2],
   refreshToken: [refreshTokenPost1, refreshTokenPost2],
   status: [statusPost1, statusPost2],
+  requestPasswordChange: [
+    requestPasswordChangePost1,
+    requestPasswordChangePost2,
+  ],
+  validatePasswordRequestCode: [
+    validatePasswordRequestCodePost1,
+    validatePasswordRequestCodePost2,
+  ],
 };
 
 export const completeAuthMiddleware: AuthMiddlewareMap = {
@@ -72,4 +95,6 @@ export const completeAuthMiddleware: AuthMiddlewareMap = {
   changePassword: [changePasswordComplete],
   refreshToken: [refreshTokenComplete],
   status: [authStatusComplete],
+  requestPasswordChange: [requestPasswordChangeComplete],
+  validatePasswordRequestCode: [validatePasswordRequestCodeComplete],
 };
