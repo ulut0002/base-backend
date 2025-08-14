@@ -8,9 +8,12 @@ import {
   LoginUserResult,
   RegisterUserInput,
   RegisterUserResult,
+  PasswordChangeRequestRequest,
+  PasswordChangeRequestResult,
   SessionData,
   UserDocument,
   UserRole,
+  TypeOrNull,
 } from "../types";
 import {
   createLocalUser,
@@ -230,4 +233,13 @@ export const createSessionObject = (user: UserDocument): SessionData => {
   };
 };
 
-export { registerUser, loginUser, changeUserPassword };
+const requestPasswordChange = async (
+  request: PasswordChangeRequestRequest
+): Promise<TypeOrNull<PasswordChangeRequestResult>> => {
+  const { userId } = request;
+  console.log("Requesting password change for userId:", userId);
+
+  return null;
+};
+
+export { registerUser, loginUser, changeUserPassword, requestPasswordChange };

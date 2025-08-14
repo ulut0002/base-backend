@@ -10,6 +10,7 @@ import {
   changePassword,
   checkAuthStatus,
   refreshToken,
+  requestPasswordChange,
 } from "../controllers";
 import {
   completeAuthMiddleware,
@@ -54,7 +55,11 @@ authRouter.get(
 
 authRouter.post(
   "/request-password-change",
-  passport.authenticate("jwt", { session: false })
+  passport.authenticate("jwt", { session: false }),
+  ...preAuthMiddleware.requestPasswordChange,
+  requestPasswordChange,
+  ...postAuthMiddleware.requestPasswordChange,
+  ...completeAuthMiddleware.requestPasswordChange
 );
 
 authRouter.patch(

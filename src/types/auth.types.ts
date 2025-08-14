@@ -68,6 +68,15 @@ type SessionData = {
   role: string; // User role
 };
 
+type PasswordChangeRequestRequest = {
+  userId: TypeOrNull<string>;
+};
+
+type PasswordChangeRequestResult = {
+  success: boolean;
+  issues?: Issue[];
+};
+
 export type {
   RegisterUserInput,
   RegisterUserResult,
@@ -79,4 +88,6 @@ export type {
   MeResponse,
   SessionData,
   RegisterUserResponseData,
+  PasswordChangeRequestRequest,
+  PasswordChangeRequestResult,
 };

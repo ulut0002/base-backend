@@ -125,7 +125,7 @@ const requestPasswordChangeComplete = (
   next: NextFunction
 ) => {
   console.log("Post-requestPasswordChange #1 middleware executed");
-  next();
+  res.status(200).json({ success: true });
 };
 
 const validatePasswordRequestCodeComplete = (

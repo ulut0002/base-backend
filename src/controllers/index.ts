@@ -8,6 +8,7 @@ import {
   refreshToken,
   changePassword,
   checkAuthStatus,
+  requestPasswordChange,
 } from "./auth.controller";
 import {
   profile,
@@ -46,6 +47,7 @@ export {
   refreshToken,
   changePassword,
   checkAuthStatus,
+  requestPasswordChange,
 };
 
 export {

@@ -1,5 +1,10 @@
 import { createSuperAdminIfNeeded } from "./admin.services";
-import { registerUser, loginUser, changeUserPassword } from "./auth.services";
+import {
+  registerUser,
+  loginUser,
+  changeUserPassword,
+  requestPasswordChange,
+} from "./auth.services";
 import {
   resendVerificationEmail,
   resetUserPassword,
@@ -37,7 +42,7 @@ export {
   deleteUser,
 };
 
-export { registerUser, loginUser, changeUserPassword };
+export { registerUser, loginUser, changeUserPassword, requestPasswordChange };
 
 export {
   listActiveSessions,

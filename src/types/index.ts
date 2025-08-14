@@ -11,6 +11,8 @@ import {
   VerificationCodeStatus,
   VerificationCodeType,
   RegisterUserResponseData,
+  PasswordChangeRequestRequest,
+  PasswordChangeRequestResult,
 } from "./auth.types";
 
 // Config Types
@@ -61,6 +63,8 @@ export type {
   VerificationCodeStatus,
   VerificationCodeType,
   RegisterUserResponseData,
+  PasswordChangeRequestRequest,
+  PasswordChangeRequestResult,
 };
 
 // Auth Types Named Export

@@ -6,6 +6,7 @@ import {
   findUserById,
   loginUser,
   registerUser,
+  requestPasswordChange as requestPasswordChangeForUser,
 } from "../services";
 
 import { StrategyOptions, Strategy as JwtStrategy } from "passport-jwt";
@@ -19,7 +20,11 @@ import {
   checkPasswordSetup,
 } from "../lib/utils";
 import normalizeEmail from "normalize-email";
-import { addIssuesToRequest, RegisterUserResponseData } from "../types";
+import {
+  addIssuesToRequest,
+  RegisterUserResponseData,
+  UserDocument,
+} from "../types";
 import { ErrorCodes } from "../lib/constants";
 
 /**
@@ -228,6 +233,16 @@ const me = async (
   next();
 };
 
+const requestPasswordChange = async (
+  req: Request,
+  __: Response,
+  next: NextFunction
+): Promise<void> => {
+  const { id } = req.user as UserDocument;
+  await requestPasswordChangeForUser({ userId: id });
+  next();
+};
+
 /**
  * Refreshes the JWT token.
  * - Validates the existing refresh token (from cookie).
@@ -333,4 +348,5 @@ export {
   refreshToken,
   changePassword,
   checkAuthStatus,
+  requestPasswordChange,
 };
