@@ -21,7 +21,7 @@ import {
 import normalizeEmail from "normalize-email";
 import {
   addIssuesToRequest,
-  RegisterUserResponseData,
+  RegisterUser_Response,
   UserDocument,
 } from "../types";
 import { ErrorCodes } from "../lib/constants";
@@ -92,7 +92,7 @@ const register = async (
 
     addIssuesToRequest(req, issues);
 
-    const result: RegisterUserResponseData = {
+    const result: RegisterUser_Response = {
       userId: userObject?._id.toString() || null,
       success: !!token,
       registrationToken: token || null,

@@ -6,14 +6,14 @@ import {
   ChangePasswordResult,
   LoginUserInput,
   LoginUserResult,
-  RegisterUserInput,
-  RegisterUserServiceResponse,
+  RegisterUserUserRequest,
   PasswordChangeRequestRequest,
   PasswordChangeRequestResult,
   SessionData,
   UserDocument,
   UserRole,
   TypeOrNull,
+  RegisterUser_ServiceResponse,
 } from "../types";
 import {
   createLocalUser,
@@ -38,7 +38,7 @@ const registerUser = async ({
   password,
   jwtSecretKey,
   passwordHashLength,
-}: RegisterUserInput): Promise<RegisterUserServiceResponse> => {
+}: RegisterUserUserRequest): Promise<RegisterUser_ServiceResponse> => {
   const envConfig = loadConfig();
   const normalizedEmail = normalizeEmail(email);
 

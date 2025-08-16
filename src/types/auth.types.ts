@@ -14,13 +14,13 @@ interface RegisterUserUserRequest {
   passwordHashLength: number;
 }
 
-interface RegisterUserUserResponse {
+interface RegisterUser_ServiceResponse {
   token?: TypeOrNull<string>;
   userObject?: any;
   issues?: Issue[];
 }
 
-interface RegisterUserServiceResponse2 {
+interface RegisterUser_Response {
   userId: TypeOrNull<string>;
   success: boolean;
   registrationToken: TypeOrNull<string>;
@@ -80,8 +80,8 @@ type PasswordChangeRequestResult = {
 };
 
 export type {
-  RegisterUserUserRequest as RegisterUserInput,
-  RegisterUserUserResponse as RegisterUserResult,
+  RegisterUserUserRequest,
+  RegisterUser_ServiceResponse,
   LoginUserInput,
   LoginUserResult,
   VerificationCodeType,
@@ -89,7 +89,7 @@ export type {
   ChangePasswordResult,
   MeResponse,
   SessionData,
-  RegisterUserServiceResponse2 as RegisterUserResponseData,
+  RegisterUser_Response,
   PasswordChangeRequestRequest,
   PasswordChangeRequestResult,
 };
