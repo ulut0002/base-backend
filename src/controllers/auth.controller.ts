@@ -1,4 +1,3 @@
-// Load environment-specific configuration values (e.g., JWT secret).
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import {
@@ -27,11 +26,6 @@ import {
 } from "../types";
 import { ErrorCodes } from "../lib/constants";
 
-/**
- * Configures Passport.js with JWT strategy.
- * Uses the token stored in HTTP-only cookies for user authentication.
- * Attaches the decoded user to `req.user` if valid.
- */
 const configureJwtStrategy = (passport: PassportStatic) => {
   const envConfig = loadConfig();
   const secret = envConfig.backendJwtSecretKey;
@@ -39,18 +33,17 @@ const configureJwtStrategy = (passport: PassportStatic) => {
   const opts: StrategyOptions = {
     jwtFromRequest: (req: Request) => {
       if (req && req.cookies) {
-        return req.cookies.token; // Extract token from signed cookie
+        return req.cookies.token;
       }
       return null;
     },
     secretOrKey: secret!,
   };
 
-  // Attach the JWT strategy to passport
   passport.use(
     new JwtStrategy(opts, async (payload, done) => {
       try {
-        const user = await findUserById(payload.sub); // Decode user ID from token
+        const user = await findUserById(payload.sub);
         return user ? done(null, user) : done(null, false);
       } catch (err) {
         return done(err, false);
@@ -59,43 +52,23 @@ const configureJwtStrategy = (passport: PassportStatic) => {
   );
 };
 
-/**
- * Handles user registration.
- *
- * Flow:
- * 1. Load environment configuration.
- * 2. Normalize and sanitize input fields (username, email, password).
- * 3. Validate input fields and configuration.
- * 4. If validation passes, attempt to register the user.
- * 5. On success, set token and user data on the request.
- * 6. Add all issues (validation or registration-related) to req.xMeta.
- * 7. Pass control to the next middleware (response handler).
- *
- * Notes:
- * - The final response is handled by a separate middleware that inspects req.xMeta and req.xData.
- */
 const register = async (
   req: Request,
   _: Response,
   next: NextFunction
 ): Promise<void> => {
-  // Load app configuration (JWT secret, email normalization, etc.)
   const envConfig = loadConfig();
   const jwtSecretKey = envConfig.backendJwtSecretKey || "";
 
-  // Extract and normalize inputs from request body
   const rawUsername: string = req.body.username?.trim() || "";
   const rawEmail: string = req.body.email?.trim().toLowerCase() || "";
   const password: string = req.body.password || "";
   const normalizedEmail: string = normalizeEmail(rawEmail);
 
-  // Normalize email if enabled in config
   const email = envConfig.useNormalizedEmails ? normalizedEmail : rawEmail;
 
-  // Use email as username if usernames are not required
   const username = envConfig.userUsernameRequired ? rawUsername : email;
 
-  // Pre-registration validation (e.g., format, presence, config checks)
   let preIssues: Issue[] = [
     ...checkUsername(username),
     ...checkEmail(email),
@@ -104,12 +77,10 @@ const register = async (
     ...checkPasswordSetup(),
   ];
 
-  // Attach validation issues to request and short-circuit if there are any errors
   const hasPreValidationErrors = addIssuesToRequest(req, preIssues);
   if (hasPreValidationErrors) return next();
 
   try {
-    // Attempt to register the user (hash password, save to DB, issue JWT)
     const { token, userObject, issues } = await registerUser({
       username,
       email,
@@ -119,17 +90,15 @@ const register = async (
       passwordHashLength: envConfig.passwordHashLength!,
     });
 
-    // Attach post-registration issues (e.g., database constraints) to request
     addIssuesToRequest(req, issues);
 
-    // Populate request data state for response middleware
     const result: RegisterUserResponseData = {
       userId: userObject?._id.toString() || null,
       success: !!token,
       registrationToken: token || null,
     };
-    req.xData!.registerUserResult = result;
-    req.xData!.userId = userObject?._id.toString();
+    req.xContextData!.registerUserResult = result;
+    req.xContextData!.userId = userObject?._id.toString();
     next();
   } catch (err: any) {
     const issues: Issue[] = [];
@@ -144,12 +113,7 @@ const register = async (
     next(new BadRequestError(err.message || "Registration failed"));
   }
 };
-/**
- * Handles user login.
- * - Validates input credentials.
- * - Delegates login logic to auth service.
- * - Sets JWT token in HTTP-only cookie on success.
- */
+
 const login = async (
   req: Request,
   res: Response,
@@ -164,7 +128,6 @@ const login = async (
 
   let preIssues: Issue[] = [];
 
-  // Validate inputs
   if (!username) {
     preIssues.push(
       createIssue({
@@ -185,7 +148,6 @@ const login = async (
     ...checkPasswordSetup(),
   ];
 
-  // Attach validation issues to request and short-circuit if there are any errors
   const hasPreValidationErrors = addIssuesToRequest(req, preIssues);
   if (hasPreValidationErrors) return next();
 
@@ -197,9 +159,9 @@ const login = async (
     });
 
     addIssuesToRequest(req, issues);
-    req.xData!.userId = userObject?._id.toString() || null;
-    req.xData!.success = !!token;
-    req.xData!.loginToken = token || null;
+    req.xContextData!.userId = userObject?._id.toString() || null;
+    req.xContextData!.success = !!token;
+    req.xContextData!.loginToken = token || null;
 
     next();
   } catch (err: any) {
@@ -213,18 +175,10 @@ const login = async (
   }
 };
 
-/**
- * Logs out the user.
- * - Clears the JWT cookie from the browser.
- */
 const logout = (_: Request, __: Response, next: NextFunction): void => {
   next();
 };
 
-/**
- * Returns the currently authenticated user.
- * Assumes passport middleware has attached `req.user`.
- */
 const me = async (
   _: Request,
   __: Response,
@@ -243,11 +197,6 @@ const requestPasswordChange = async (
   next();
 };
 
-/**
- * Refreshes the JWT token.
- * - Validates the existing refresh token (from cookie).
- * - Issues a new access token and sets it in an HTTP-only cookie.
- */
 const refreshToken = async (req: Request, res: Response): Promise<void> => {
   const token = req.cookies?.refreshToken;
   const envConfig = loadConfig();
@@ -281,11 +230,7 @@ const refreshToken = async (req: Request, res: Response): Promise<void> => {
     res.status(401).json({ message: "Invalid refresh token" });
   }
 };
-/**
- * Allows a logged-in user to change their password.
- * - Validates current and new passwords.
- * - Delegates logic to the service.
- */
+
 const changePassword = async (
   req: Request,
   res: Response,
@@ -327,10 +272,6 @@ const changePassword = async (
   }
 };
 
-/**
- * Returns authentication status.
- * - Indicates whether `req.user` is populated by the JWT strategy.
- */
 const checkAuthStatus = async (
   _: Request,
   __: Response,

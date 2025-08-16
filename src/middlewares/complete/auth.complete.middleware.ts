@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from "express";
-import { BadRequestError, loadConfig, logger } from "../lib";
-import { minutesToMilliseconds } from "../lib/utils";
-import { ErrorCodes } from "../lib/constants";
-import { MeResponse, UserDocument } from "../types";
+import { BadRequestError, loadConfig, logger } from "../../lib";
+import { minutesToMilliseconds } from "../../lib/utils";
+import { ErrorCodes } from "../../lib/constants";
+import { MeResponse, UserDocument } from "../../types";
 
 const registerComplete = (req: Request, res: Response, next: NextFunction) => {
   const envConfig = loadConfig();
-  const success = !req.xMeta?.hasErrors();
+  const success = !req.xIssues?.hasErrors();
   if (success) {
-    const result = req.xData!.registerUserResult;
+    const result = req.xContextData!.registerUserResult;
     res
       .cookie(envConfig.cookieName!, result?.registrationToken, {
         httpOnly: true,
@@ -20,20 +20,19 @@ const registerComplete = (req: Request, res: Response, next: NextFunction) => {
       .json({ message: "Authentication successful" });
     return;
   } else {
-    if (!req.xData!.token) {
+    if (!req.xContextData!.token) {
       next(new BadRequestError("Failed to register user"));
       return;
     }
   }
-
   return;
 };
 
 const loginComplete = (req: Request, res: Response, next: NextFunction) => {
   const envConfig = loadConfig();
-  const success = !req.xMeta?.hasErrors();
+  const success = !req.xIssues?.hasErrors();
 
-  const token = req.xData?.loginToken || null;
+  const token = req.xContextData?.loginToken || null;
   if (!success) {
     res.clearCookie(envConfig.cookieName!, {
       httpOnly: true,
@@ -54,8 +53,8 @@ const loginComplete = (req: Request, res: Response, next: NextFunction) => {
     .status(200)
     .json({
       message: "Authentication successful",
-      warnings: req.xMeta?.getWarnings(),
-      messages: req.xMeta?.getMessages(),
+      warnings: req.xIssues?.getWarnings(),
+      messages: req.xIssues?.getMessages(),
     });
 };
 
@@ -81,7 +80,7 @@ const changePasswordComplete = (
   res: Response,
   next: NextFunction
 ) => {
-  const success = !req.xMeta?.hasErrors();
+  const success = !req.xIssues?.hasErrors();
   if (!success) {
     return next(new BadRequestError("Change password failed"));
   }
@@ -93,7 +92,7 @@ const refreshTokenComplete = (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.xData?.loginToken || null;
+  const token = req.xContextData?.loginToken || null;
   if (!token) {
     return next(new BadRequestError("Failed to refresh token"));
   }

@@ -7,7 +7,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import passport from "passport";
 import multer from "multer";
-import { ensureBody, generalLimiter } from "../middleware";
+import { ensureBody, generalLimiter } from "../middlewares";
 import { getBackendUrl } from "../lib";
 
 /**

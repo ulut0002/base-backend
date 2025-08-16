@@ -10,7 +10,7 @@ import {
 import {
   postSecurityMiddleware,
   preSecurityMiddleware,
-} from "../middleware/security.middleware";
+} from "../middlewares/security.middleware";
 
 const securityRouter: Router = express.Router();
 

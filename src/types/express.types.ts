@@ -2,12 +2,11 @@ import "express";
 import { Issue, IssueType } from "../lib";
 import { TypeOrNull } from "./generic.types";
 import { Request } from "express";
-import { TFunction } from "i18next";
-import { RegisterUserResponseData } from "./auth.types";
+import { RegisterUserResponseData as RegisterUserServiceResponse } from "./auth.types";
 
 // Update src/middleware/request.middleware.ts as well
 
-interface RequestMetaData {
+interface RequestIssues {
   errors: Issue[];
   warnings: Issue[];
   messages: Issue[];
@@ -28,8 +27,8 @@ interface RequestMetaData {
   getMessages: () => Issue[];
 }
 
-export interface RequestDataState {
-  registerUserResult?: RegisterUserResponseData;
+export interface RequestContextData {
+  registerUserResult?: RegisterUserServiceResponse;
   userId?: TypeOrNull<string>;
   registrationToken?: TypeOrNull<string>;
   loginToken?: TypeOrNull<string>;
@@ -42,9 +41,8 @@ declare module "express" {
   interface Request {
     authToken?: string;
     authUser?: any; // optional: attach user data if needed
-    xMeta?: RequestMetaData; // metadata for errors, warnings, messages
-    xData?: RequestDataState; // state for request data
-    t?: TFunction;
+    xIssues?: RequestIssues; // metadata for errors, warnings, messages
+    xContextData?: RequestContextData; // state for request data
   }
 }
 
@@ -58,7 +56,7 @@ export function addIssuesToRequest(
   let hasErrors = false;
 
   issues.forEach((issue) => {
-    req.xMeta?.addIssue(issue, issue.type ?? IssueType.error);
+    req.xIssues?.addIssue(issue, issue.type ?? IssueType.error);
     if ((issue.type ?? IssueType.error) === IssueType.error) {
       hasErrors = true;
     }

@@ -147,7 +147,7 @@ const errorHandler = (
       name: error.name || "API_ERROR",
       internalCode: error.internalCode || MessageCodes.API_ERROR,
       message: error.message,
-      issues: req.xMeta!.getAllIssues(),
+      issues: req.xIssues!.getAllIssues(),
     });
     return;
   }

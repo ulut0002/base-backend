@@ -14,7 +14,7 @@ const ensureBody = (req: Request, _res: Response, next: NextFunction) => {
   const warnings: Issue[] = [];
   const messages: Issue[] = [];
 
-  req.xMeta = {
+  req.xIssues = {
     errors: [],
     warnings: [],
     messages: [],
@@ -49,7 +49,7 @@ const ensureBody = (req: Request, _res: Response, next: NextFunction) => {
 
   console.log("Accept-Language header:", acceptLangHeader);
 
-  req.xData = {
+  req.xContextData = {
     userId: null,
     registrationToken: null,
     loginToken: null,

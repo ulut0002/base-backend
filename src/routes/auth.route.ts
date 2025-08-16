@@ -16,7 +16,7 @@ import {
   completeAuthMiddleware,
   postAuthMiddleware,
   preAuthMiddleware,
-} from "../middleware";
+} from "../middlewares";
 
 const authRouter: Router = express.Router();
 

@@ -15,9 +15,9 @@ import {
   updateEmailPost2,
   updateUsernamePost1,
   updateUsernamePost2,
-} from "./me.post.middleware.js";
+} from "./post/me.post.middleware.js";
 
-import { MeMiddlewareMap } from "../types";
+import { MeMiddlewareMap } from "../types/index.js";
 import {
   deactivateAccountPre1,
   deactivateAccountPre2,
@@ -35,7 +35,7 @@ import {
   updateEmailPre2,
   updateUsernamePre1,
   updateUsernamePre2,
-} from "./me.pre.middleware.js";
+} from "./pre/me.pre.middleware.js";
 
 // const preMeMiddleware: MeMiddlewareMap = {
 //   profile: [meProfilePre1, meProfilePre2],

@@ -58,7 +58,7 @@ export type {
   LoginUserResult,
   MeResponse,
   RegisterUserInput,
-  RegisterUserResult,
+  RegisterUserResult as RegisterUserServiceResponse,
   SessionData,
   VerificationCodeStatus,
   VerificationCodeType,

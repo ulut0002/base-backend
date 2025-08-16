@@ -4,7 +4,8 @@ import { Issue } from "../lib";
 import { TypeOrNull } from "./generic.types";
 import { UserDocument } from "./user.types";
 
-interface RegisterUserInput {
+//register
+interface RegisterUserUserRequest {
   username: string;
   email: string;
   normalizedEmail?: string;
@@ -13,18 +14,19 @@ interface RegisterUserInput {
   passwordHashLength: number;
 }
 
-interface RegisterUserResult {
+interface RegisterUserUserResponse {
   token?: TypeOrNull<string>;
   userObject?: any;
   issues?: Issue[];
 }
 
-interface RegisterUserResponseData {
+interface RegisterUserServiceResponse2 {
   userId: TypeOrNull<string>;
   success: boolean;
   registrationToken: TypeOrNull<string>;
 }
 
+// Login
 interface LoginUserInput {
   usernameOrEmail: string;
   password: string;
@@ -78,8 +80,8 @@ type PasswordChangeRequestResult = {
 };
 
 export type {
-  RegisterUserInput,
-  RegisterUserResult,
+  RegisterUserUserRequest as RegisterUserInput,
+  RegisterUserUserResponse as RegisterUserResult,
   LoginUserInput,
   LoginUserResult,
   VerificationCodeType,
@@ -87,7 +89,7 @@ export type {
   ChangePasswordResult,
   MeResponse,
   SessionData,
-  RegisterUserResponseData,
+  RegisterUserServiceResponse2 as RegisterUserResponseData,
   PasswordChangeRequestRequest,
   PasswordChangeRequestResult,
 };

@@ -7,7 +7,7 @@ import {
   LoginUserInput,
   LoginUserResult,
   RegisterUserInput,
-  RegisterUserResult,
+  RegisterUserServiceResponse,
   PasswordChangeRequestRequest,
   PasswordChangeRequestResult,
   SessionData,
@@ -38,7 +38,7 @@ const registerUser = async ({
   password,
   jwtSecretKey,
   passwordHashLength,
-}: RegisterUserInput): Promise<RegisterUserResult> => {
+}: RegisterUserInput): Promise<RegisterUserServiceResponse> => {
   const envConfig = loadConfig();
   const normalizedEmail = normalizeEmail(email);
 

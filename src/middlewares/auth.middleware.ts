@@ -1,3 +1,4 @@
+import { AuthMiddlewareMap } from "../types";
 import {
   changePasswordPre1,
   changePasswordPre2,
@@ -11,13 +12,13 @@ import {
   refreshTokenPre2,
   registerPre1,
   registerPre2,
-  statusPre1,
-  statusPre2,
   requestPasswordChangePre1,
   requestPasswordChangePre2,
+  statusPre1,
+  statusPre2,
   validatePasswordRequestCodePre1,
   validatePasswordRequestCodePre2,
-} from "./auth.pre.middleware";
+} from "./index.pre";
 
 import {
   changePasswordPost1,
@@ -38,8 +39,8 @@ import {
   requestPasswordChangePost2,
   validatePasswordRequestCodePost1,
   validatePasswordRequestCodePost2,
-} from "./auth.post.middleware";
-import { AuthMiddlewareMap } from "../types";
+} from "./index.post";
+
 import {
   authStatusComplete,
   changePasswordComplete,
@@ -50,7 +51,7 @@ import {
   registerComplete,
   requestPasswordChangeComplete,
   validatePasswordRequestCodeComplete,
-} from "./auth.complete.middleware";
+} from "./index.complete";
 
 // Pre-middlewares (before controller logic)
 export const preAuthMiddleware: AuthMiddlewareMap = {
